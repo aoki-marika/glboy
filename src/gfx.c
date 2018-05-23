@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "gfx.h"
 #include "gfx_constants.h"
 #include "utils.h"
@@ -30,4 +32,90 @@ bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsiz
 bool gbCreateImageTexture(GLuint *texture, GLuint pixels[])
 {
     return gbCreateTexture(texture, GL_LUMINANCE, TILE_WIDTH, TILE_HEIGHT, pixels);
+}
+
+bool gbCreateShader(GLuint *shader, GLenum type, const GLchar *source[])
+{
+    // create and compile the shader
+    *shader = glCreateShader(type);
+    glShaderSource(*shader, 1, source, NULL);
+    glCompileShader(*shader);
+
+    // check for compilation errors
+    GLint shaderCompiled = GL_FALSE;
+
+    glGetShaderiv(*shader, GL_COMPILE_STATUS, &shaderCompiled);
+
+    if (shaderCompiled != GL_TRUE)
+    {
+        printf("Unable to compile shader '%d'!\n", *shader);
+        gbPrintShaderLog(*shader);
+        return false;
+    }
+
+    return true;
+}
+
+void gbPrintProgramLog(GLuint program)
+{
+    // make sure program is actually a program
+    if (glIsProgram(program))
+    {
+        int infoLogLength = 0;
+        int maxLength = infoLogLength;
+
+        // get the length of the info log
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+        // allocate the info log
+        char infoLog[maxLength];
+
+        // get and print the log
+        glGetProgramInfoLog(program, maxLength, &infoLogLength, infoLog);
+
+        if (infoLogLength > 0)
+            printf("[Program] %s\n", infoLog);
+    }
+    else
+        printf("Given name '%d' is not a program.\n", program);
+}
+
+void gbPrintShaderLog(GLuint shader)
+{
+    // make sure shader is actually a shader
+    if (glIsShader(shader))
+    {
+        int infoLogLength = 0;
+        int maxLength = infoLogLength;
+
+        // get the length of the info log
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        // allocate the info log
+        char infoLog[maxLength];
+
+        // get and print the log
+        glGetShaderInfoLog(shader, maxLength, &infoLogLength, infoLog);
+
+        if (infoLogLength > 0)
+            printf("[Shader] %s\n", infoLog);
+    }
+    else
+        printf("Given name '%d' is not a shader.\n", shader);
+}
+
+bool gbProgramError(GLuint program, const char *message)
+{
+    // check for program errors
+    GLint programSuccess = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &programSuccess);
+
+    if (programSuccess != GL_TRUE)
+    {
+        printf("Error %s '%d'!\n", message, program);
+        gbPrintProgramLog(program);
+        return true;
+    }
+
+    return false;
 }

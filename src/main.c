@@ -34,11 +34,11 @@ int main(int argc, char *argv[])
     gbConvertImage(pixels, convertedPixels);
     gbCreateImageTexture(&gTex, convertedPixels);
 
-    GLuint palette[PAL_SIZE] = {
-        0xFFFFFFFF,
-        0xFFAAAAAA,
-        0xFF555555,
-        0xFF000000,
+    SDL_Color palette[PAL_SIZE] = {
+        { 255, 255, 255 },
+        { 170, 170, 170 },
+        { 85, 85, 85 },
+        { 0, 0, 0 },
     };
 
     gbSetPalette(palette);

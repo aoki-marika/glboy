@@ -1,6 +1,4 @@
 #include "game.h"
-#include "sdl.h"
-#include "gl.h"
 #include "utils.h"
 #include "gfx.h"
 
@@ -9,7 +7,7 @@ bool gRunning = false;
 
 SDL_Window *gWindow;
 SDL_GLContext gContext;
-GLuint gPaletteTexture;
+GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
 
 void (*gRenderCallback)();
 
@@ -34,10 +32,18 @@ bool gbInit()
     if (sdlError("initializing SDL"))
         return false;
 
+    // set the OpenGL context version
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
     // get the OpenGL context
     gContext = SDL_GL_CreateContext(gWindow);
     if (sdlError("initializing OpenGL context"))
         return false;
+
+    // print out the OpenGL and GLSL versions
+    printf("Running OpenGL %s and GLSL %s.\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     // setup the viewport
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -54,11 +60,50 @@ bool gbInit()
     glLoadIdentity();
 
     // setup the scene
-    glClearColor(1, 1, 1, 1);
     glEnable(GL_TEXTURE_2D);
 
-    // create the palette texture
-    gbCreateTexture(&gPaletteTexture, GL_RGBA8, PAL_SIZE, 1, NULL);
+    // create the palette program
+    gPaletteProgram = glCreateProgram();
+
+    // create the vertex and fragment shaders
+    const GLchar *vertexSource[] =
+    {
+        "void main() { \
+             gl_Position = ftransform(); \
+             gl_TexCoord[0] = gl_MultiTexCoord0; \
+         }"
+    };
+
+    const GLchar *fragmentSource[] =
+    {
+        "uniform sampler2D texture; \
+         uniform vec3 palette[4]; \
+         \
+         void main() \
+         { \
+             vec4 texel = texture2D(texture, gl_TexCoord[0].xy); \
+             int i = int((texel.r * 255.0) + 0.5); \
+             vec3 p = palette[i]; \
+             gl_FragColor = vec4(p.r, p.g, p.b, texel.a); \
+         }"
+    };
+
+    gbCreateShader(&gPaletteVertexShader, GL_VERTEX_SHADER, vertexSource);
+    gbCreateShader(&gPaletteFragmentShader, GL_FRAGMENT_SHADER, fragmentSource);
+
+    // attach the shaders
+    glAttachShader(gPaletteProgram, gPaletteVertexShader);
+    glAttachShader(gPaletteProgram, gPaletteFragmentShader);
+
+    // link the program
+    glLinkProgram(gPaletteProgram);
+
+    // check for program errors
+    if (gbProgramError(gPaletteProgram, "linking program"))
+        return false;
+
+    // use the palette program
+    glUseProgram(gPaletteProgram);
 
     // check for any OpenGL errors from intializing
     if (glError("initializing OpenGL"))
@@ -73,11 +118,24 @@ void gbSetRenderCallback(void (*callback)())
     gRenderCallback = callback;
 }
 
-void gbSetPalette(GLuint colours[PAL_SIZE])
+void gbSetPalette(SDL_Color colours[PAL_SIZE])
 {
-    glBindTexture(GL_TEXTURE_2D, gPaletteTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PAL_SIZE, 1, GL_RGBA, GL_UNSIGNED_BYTE, colours);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    GLint pal = glGetUniformLocation(gPaletteProgram, "palette");
+
+    // convert colours to float vec4s for GLSL
+    GLfloat palColours[PAL_SIZE][3];
+
+    for (int i = 0; i < PAL_SIZE; i++)
+    {
+        palColours[i][0] = colours[i].r / 255.0f;
+        palColours[i][1] = colours[i].g / 255.0f;
+        palColours[i][2] = colours[i].b / 255.0f;
+    }
+
+    glUniform3fv(pal, PAL_SIZE, (const GLfloat *)palColours);
+
+    // update the clear colour to use the palette
+    glClearColor(colours[0].r, colours[0].g, colours[0].b, 1);
 }
 
 void update()
@@ -101,6 +159,10 @@ void render()
 {
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
+
+    GLint tex = glGetUniformLocation(gPaletteProgram, "texture");
+    glUniform1i(tex, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     if (gRenderCallback)
         gRenderCallback();
@@ -138,8 +200,10 @@ bool gbQuit()
     // stop the program if its running
     gRunning = false;
 
-    // delete the palette texture
-    glDeleteTextures(1, &gPaletteTexture);
+    // delete the palette texture and program
+    glDeleteShader(gPaletteVertexShader);
+    glDeleteShader(gPaletteFragmentShader);
+    glDeleteProgram(gPaletteProgram);
 
     // quit SDL and OpenGL
     SDL_DestroyWindow(gWindow);

@@ -6,3 +6,8 @@
 
 bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsizei height, GLuint pixels[]);
 bool gbCreateImageTexture(GLuint *texture, GLuint pixels[]);
+bool gbCreateShader(GLuint *shader, GLenum type, const GLchar *source[]);
+
+void gbPrintProgramLog(GLuint program);
+void gbPrintShaderLog(GLuint shader);
+bool gbProgramError(GLuint program, const char *message);
