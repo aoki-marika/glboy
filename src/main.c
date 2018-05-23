@@ -1,6 +1,12 @@
 #include <stdio.h>
 
+#include "gb.h"
+
 int main(int argc, char *argv[])
 {
-    printf("Hello, world!\n");
+    if (!gbInit())
+        return 1;
+
+    gbQuit();
+    return 0;
 }

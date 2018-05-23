@@ -1,0 +1,7 @@
+#pragma once
+
+#define TILE_WIDTH 8
+#define TILE_HEIGHT 8
+
+#define SCREEN_WIDTH TILE_WIDTH * 20
+#define SCREEN_HEIGHT TILE_HEIGHT * 18
