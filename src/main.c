@@ -4,6 +4,19 @@
 #include "image.h"
 #include "gfx_constants.h"
 
+GLuint gTex;
+
+void renderMain()
+{
+    glBindTexture(GL_TEXTURE_2D, gTex);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, TILE_HEIGHT);
+    glEnd();
+}
+
 int main(int argc, char *argv[])
 {
     if (!gbInit())
@@ -15,6 +28,13 @@ int main(int argc, char *argv[])
 
     int pixels[TILE_SIZE];
     gbLoadImage(bytes, pixels);
+
+    GLuint convertedPixels[TILE_SIZE];
+    gbConvertImage(pixels, convertedPixels);
+
+    gbCreateTexture(&gTex, convertedPixels);
+
+    gbSetRenderCallback(renderMain);
 
     if (!gbRun())
         return 1;
