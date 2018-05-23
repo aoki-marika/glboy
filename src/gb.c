@@ -60,14 +60,22 @@ bool gbInit()
     if (sdlError("initializing OpenGL context"))
         return false;
 
-    // setup the scene with defaults
+    // setup the viewport
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0);
-    glClearColor(1, 1, 1, 1);
 
-    // initialize the matrix
+    // initialize the projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // setup the coordinates so 0,0 is the top-left corner
+    glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0);
+
+    // initialize the model view matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+
+    // setup the scene
+    glClearColor(1, 1, 1, 1);
 
     // check for any OpenGL errors from intializing
     if (glError("initializing OpenGL"))
@@ -94,6 +102,17 @@ void update()
     }
 }
 
+void render()
+{
+    // clear the colour buffer
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // todo: rendering
+
+    // display the new frame
+    SDL_GL_SwapWindow(gWindow);
+}
+
 bool gbRun()
 {
     if (!gInitialized)
@@ -106,6 +125,7 @@ bool gbRun()
     while (gRunning)
     {
         update();
+        render();
     }
 
     return true;
