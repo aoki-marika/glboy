@@ -9,16 +9,6 @@ GLuint gTex;
 
 void renderMain()
 {
-    // warning: seizure
-    int palette[PAL_SIZE] = {
-        rand() % PAL_SIZE,
-        rand() % PAL_SIZE,
-        rand() % PAL_SIZE,
-        rand() % PAL_SIZE,
-    };
-
-    gbSetPalette(palette);
-
     glBindTexture(GL_TEXTURE_2D, gTex);
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
@@ -37,12 +27,10 @@ int main(int argc, char *argv[])
         0xFF, 0x00, 0x7E, 0xFF, 0x85, 0x81, 0x89, 0x83, 0x93, 0x85, 0xA5, 0x8B, 0xC9, 0x97, 0x7E, 0xFF
     };
 
-    int pixels[TILE_SIZE];
-    GLuint convertedPixels[TILE_SIZE];
+    GLuint pixels[TILE_SIZE];
 
     gbLoadImage(bytes, pixels);
-    gbConvertImage(pixels, convertedPixels);
-    gbCreateImageTexture(&gTex, convertedPixels);
+    gbCreateImageTexture(&gTex, pixels);
 
     SDL_Color colours[PAL_SIZE] = {
         // original
