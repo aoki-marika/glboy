@@ -1,4 +1,4 @@
-#include "gb.h"
+#include "game.h"
 #include "sdl.h"
 #include "gl.h"
 #include "gfx_constants.h"

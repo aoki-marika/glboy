@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "gb.h"
+#include "game.h"
 #include "image.h"
 #include "gfx_constants.h"
 
