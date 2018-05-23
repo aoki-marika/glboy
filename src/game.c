@@ -13,57 +13,8 @@ int gPalette[PAL_SIZE];
 
 void (*gRenderCallback)();
 
-bool gbInit()
+bool setupPaletteShader()
 {
-    if (gInitialized)
-    {
-        printf("Cannot initialize GlGB when it was already initialized.\n");
-        return false;
-    }
-
-    // setup SDL
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    // create the main window
-    gWindow = SDL_CreateWindow("GlBoy",
-                               SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                               SCREEN_WIDTH, SCREEN_HEIGHT,
-                               SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-
-    if (sdlError("initializing SDL"))
-        return false;
-
-    // set the OpenGL context version
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
-    // get the OpenGL context
-    gContext = SDL_GL_CreateContext(gWindow);
-    if (sdlError("initializing OpenGL context"))
-        return false;
-
-    // print out the OpenGL and GLSL versions
-    printf("Running OpenGL %s and GLSL %s.\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-    // setup the viewport
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    // initialize the projection matrix
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    // setup the coordinates so 0,0 is the top-left corner
-    glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0);
-
-    // initialize the model view matrix
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    // setup the scene
-    glEnable(GL_TEXTURE_2D);
-
     // create the palette program
     gPaletteProgram = glCreateProgram();
 
@@ -108,6 +59,65 @@ bool gbInit()
     // use the palette program
     glUseProgram(gPaletteProgram);
 
+    // say the setup was successful
+    return true;
+}
+
+bool gbInit()
+{
+    if (gInitialized)
+    {
+        printf("Cannot initialize GlGB when it was already initialized.\n");
+        return false;
+    }
+
+    // setup SDL
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    // create the main window
+    gWindow = SDL_CreateWindow("GlBoy",
+                               SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                               SCREEN_WIDTH, SCREEN_HEIGHT,
+                               SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
+    if (sdlError("initializing SDL"))
+        return false;
+
+    // set the OpenGL context version
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+    // get the OpenGL context
+    gContext = SDL_GL_CreateContext(gWindow);
+    if (sdlError("initializing OpenGL context"))
+        return false;
+
+    // print out the OpenGL and GLSL versions
+    printf("Using OpenGL %s and GLSL %s.\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    // setup the viewport
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    // initialize the projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // setup the coordinates so 0,0 is the top-left corner
+    glOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0);
+
+    // initialize the model view matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // setup the scene
+    glEnable(GL_TEXTURE_2D);
+
+    // setup the palette shadewr
+    if (!setupPaletteShader())
+        return false;
+
     // check for any OpenGL errors from intializing
     if (glError("initializing OpenGL"))
         return false;
@@ -136,17 +146,23 @@ void gbSetColours(SDL_Color colours[PAL_SIZE])
             gColours[i][c] = newColours[i][c];
     }
 
+    // set the shader colours
     glUniform3fv(glGetUniformLocation(gPaletteProgram, "colours"), PAL_SIZE, (const GLfloat *)newColours);
+
+    // update the clear colour
     gbSetPalette(gPalette);
 }
 
 void gbSetPalette(int palette[PAL_SIZE])
 {
+    // set the shader palette
     glUniform1iv(glGetUniformLocation(gPaletteProgram, "palette"), PAL_SIZE, palette);
 
+    // update the clear colour
     int c = palette[PAL_WHITE];
     glClearColor(gColours[c][0], gColours[c][1], gColours[c][2], 1);
 
+    // update gPalette
     for (int i = 0; i < PAL_SIZE; i++)
         gPalette[i] = palette[i];
 }
@@ -173,9 +189,9 @@ void render()
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // todo: not sure how this will work out in real usage, needs testing
-    GLint tex = glGetUniformLocation(gPaletteProgram, "texture");
-    glUniform1i(tex, 0);
+    // activate the paletted texture
+    GLint paletteTexture = glGetUniformLocation(gPaletteProgram, "texture");
+    glUniform1i(paletteTexture, 0);
     glActiveTexture(GL_TEXTURE0);
 
     if (gRenderCallback)
