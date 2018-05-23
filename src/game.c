@@ -86,7 +86,7 @@ bool gbInit()
                                SCREEN_WIDTH, SCREEN_HEIGHT,
                                SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-    if (sdlError("initializing SDL"))
+    if (gbSdlError("initializing SDL"))
         return false;
 
     // set the OpenGL context version
@@ -96,7 +96,7 @@ bool gbInit()
 
     // get the OpenGL context
     gContext = SDL_GL_CreateContext(gWindow);
-    if (sdlError("initializing OpenGL context"))
+    if (gbSdlError("initializing OpenGL context"))
         return false;
 
     // print out the OpenGL and GLSL versions
@@ -124,7 +124,7 @@ bool gbInit()
         return false;
 
     // check for any OpenGL errors from intializing
-    if (glError("initializing OpenGL"))
+    if (gbGlError("initializing OpenGL"))
         return false;
 
     gInitialized = true;

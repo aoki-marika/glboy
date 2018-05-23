@@ -2,7 +2,5 @@
 
 #include <stdbool.h>
 
-// todo: gb prefix
-
-bool glError(const char *message);
-bool sdlError(const char *message);
+bool gbGlError(const char *message);
+bool gbSdlError(const char *message);

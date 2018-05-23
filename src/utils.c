@@ -2,7 +2,7 @@
 #include "gl.h"
 #include "sdl.h"
 
-bool glError(const char *message)
+bool gbGlError(const char *message)
 {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)
@@ -14,7 +14,7 @@ bool glError(const char *message)
     return false;
 }
 
-bool sdlError(const char *message)
+bool gbSdlError(const char *message)
 {
     const char *error = SDL_GetError();
     if (*error)

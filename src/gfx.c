@@ -23,7 +23,7 @@ bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsiz
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // check for errors
-    if (glError("creating texture"))
+    if (gbGlError("creating texture"))
         return false;
 
     return true;
