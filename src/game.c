@@ -135,7 +135,7 @@ void gbSetPalette(SDL_Color colours[PAL_SIZE])
     glUniform3fv(pal, PAL_SIZE, (const GLfloat *)palColours);
 
     // update the clear colour to use the palette
-    glClearColor(colours[0].r, colours[0].g, colours[0].b, 1);
+    glClearColor(palColours[0][0], palColours[0][1], palColours[0][2], 1);
 }
 
 void update()
@@ -160,6 +160,7 @@ void render()
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // todo: not sure how this will work out in real usage, needs testing
     GLint tex = glGetUniformLocation(gPaletteProgram, "texture");
     glUniform1i(tex, 0);
     glActiveTexture(GL_TEXTURE0);

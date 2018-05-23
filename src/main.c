@@ -35,10 +35,17 @@ int main(int argc, char *argv[])
     gbCreateImageTexture(&gTex, convertedPixels);
 
     SDL_Color palette[PAL_SIZE] = {
-        { 255, 255, 255 },
-        { 170, 170, 170 },
-        { 85, 85, 85 },
-        { 0, 0, 0 },
+        // original
+        // { 255, 255, 255 },
+        // { 170, 170, 170 },
+        // { 85, 85, 85 },
+        // { 0, 0, 0 },
+
+        // emulated
+        { 222, 248, 210 },
+        { 130, 192, 117 },
+        { 43, 104, 86 },
+        { 5, 24, 32 },
     };
 
     gbSetPalette(palette);
