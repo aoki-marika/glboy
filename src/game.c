@@ -2,6 +2,7 @@
 #include "sdl.h"
 #include "gl.h"
 #include "utils.h"
+#include "gfx.h"
 
 bool gInitialized = false;
 bool gRunning = false;
@@ -57,8 +58,7 @@ bool gbInit()
     glEnable(GL_TEXTURE_2D);
 
     // create the palette texture
-    glGenTextures(1, &gPaletteTexture);
-    glBindTexture(GL_TEXTURE_2D, gPaletteTexture);
+    gbCreateTexture(&gPaletteTexture, GL_RGBA8, PAL_SIZE, 1, NULL);
 
     // check for any OpenGL errors from intializing
     if (glError("initializing OpenGL"))
@@ -77,6 +77,7 @@ void gbSetPalette(GLuint colours[PAL_SIZE])
 {
     glBindTexture(GL_TEXTURE_2D, gPaletteTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PAL_SIZE, 1, GL_RGBA, GL_UNSIGNED_BYTE, colours);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void update()

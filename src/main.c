@@ -32,13 +32,13 @@ int main(int argc, char *argv[])
 
     gbLoadImage(bytes, pixels);
     gbConvertImage(pixels, convertedPixels);
-    gbCreateTexture(&gTex, convertedPixels);
+    gbCreateImageTexture(&gTex, convertedPixels);
 
     GLuint palette[PAL_SIZE] = {
         0xFFFFFFFF,
-        0xAAAAAAFF,
-        0x555555FF,
-        0x000000FF,
+        0xFFAAAAAA,
+        0xFF555555,
+        0xFF000000,
     };
 
     gbSetPalette(palette);
