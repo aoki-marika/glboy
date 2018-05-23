@@ -3,7 +3,9 @@
 #include "gl.h"
 #include "gfx_constants.h"
 
-bool initialized = false;
+bool gInitialized = false;
+bool gRunning = false;
+
 SDL_Window *gWindow;
 SDL_GLContext gContext;
 
@@ -34,7 +36,7 @@ bool sdlError(const char *message)
 
 bool gbInit()
 {
-    if (initialized)
+    if (gInitialized)
     {
         printf("Cannot initialize GlGB when it was already initialized.");
         return false;
@@ -71,22 +73,62 @@ bool gbInit()
     if (glError("initializing OpenGL"))
         return false;
 
-    initialized = true;
+    gInitialized = true;
+    return true;
+}
+
+void update()
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event) != 0)
+    {
+        switch (event.type)
+        {
+            case SDL_QUIT:
+                gRunning = false;
+                return;
+            default:
+                break;
+        }
+    }
+}
+
+bool gbRun()
+{
+    if (!gInitialized)
+    {
+        printf("Cannot run GlGB when it was not initialized.");
+        return false;
+    }
+
+    gRunning = true;
+    while (gRunning)
+    {
+        update();
+    }
+
     return true;
 }
 
 bool gbQuit()
 {
-    if (!initialized)
+    if (!gInitialized)
     {
         printf("Cannot quit GlGB when it was not initialized.");
         return false;
     }
 
+    // stop the program if its running
+    gRunning = false;
+
     // quit SDL and OpenGL
     SDL_DestroyWindow(gWindow);
     SDL_GL_DeleteContext(gContext);
     SDL_Quit();
+
+    // reset the initialized state
+    gInitialized = false;
 
     return true;
 }
