@@ -8,6 +8,7 @@ bool gRunning = false;
 SDL_Window *gWindow;
 SDL_GLContext gContext;
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
+GLint gPaletteProgramColours, gPaletteProgramPalette;
 GLfloat gColours[PAL_SIZE][3];
 int gPalette[PAL_SIZE];
 
@@ -58,6 +59,10 @@ bool setupPaletteShader()
 
     // use the palette program
     glUseProgram(gPaletteProgram);
+
+    // get all the uniforms
+    gPaletteProgramColours = glGetUniformLocation(gPaletteProgram, "colours");
+    gPaletteProgramPalette = glGetUniformLocation(gPaletteProgram, "palette");
 
     // say the setup was successful
     return true;
@@ -147,7 +152,7 @@ void gbSetColours(SDL_Color colours[PAL_SIZE])
     }
 
     // set the shader colours
-    glUniform3fv(glGetUniformLocation(gPaletteProgram, "colours"), PAL_SIZE, (const GLfloat *)newColours);
+    glUniform3fv(gPaletteProgramColours, PAL_SIZE, (const GLfloat *)newColours);
 
     // update the clear colour
     gbSetPalette(gPalette);
@@ -156,7 +161,7 @@ void gbSetColours(SDL_Color colours[PAL_SIZE])
 void gbSetPalette(int palette[PAL_SIZE])
 {
     // set the shader palette
-    glUniform1iv(glGetUniformLocation(gPaletteProgram, "palette"), PAL_SIZE, palette);
+    glUniform1iv(gPaletteProgramPalette, PAL_SIZE, palette);
 
     // update the clear colour
     int c = palette[PAL_WHITE];
@@ -188,12 +193,6 @@ void render()
 {
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
-
-    // activate the paletted texture
-    // todo: only call glGetUniformLocation once
-    GLint paletteTexture = glGetUniformLocation(gPaletteProgram, "texture");
-    glUniform1i(paletteTexture, 0);
-    glActiveTexture(GL_TEXTURE0);
 
     if (gRenderCallback)
         gRenderCallback();
