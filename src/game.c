@@ -9,6 +9,7 @@ SDL_Window *gWindow;
 SDL_GLContext gContext;
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
 GLfloat gColours[PAL_SIZE][3];
+int gPalette[PAL_SIZE];
 
 void (*gRenderCallback)();
 
@@ -136,18 +137,18 @@ void gbSetColours(SDL_Color colours[PAL_SIZE])
     }
 
     glUniform3fv(glGetUniformLocation(gPaletteProgram, "colours"), PAL_SIZE, (const GLfloat *)newColours);
-    glClearColor(newColours[PAL_WHITE][0],
-                 newColours[PAL_WHITE][1],
-                 newColours[PAL_WHITE][2],
-                 1);
+    gbSetPalette(gPalette);
 }
 
 void gbSetPalette(int palette[PAL_SIZE])
 {
     glUniform1iv(glGetUniformLocation(gPaletteProgram, "palette"), PAL_SIZE, palette);
 
-    int i = palette[PAL_WHITE];
-    glClearColor(gColours[i][0], gColours[i][1], gColours[i][2], 1);
+    int c = palette[PAL_WHITE];
+    glClearColor(gColours[c][0], gColours[c][1], gColours[c][2], 1);
+
+    for (int i = 0; i < PAL_SIZE; i++)
+        gPalette[i] = palette[i];
 }
 
 void update()
