@@ -1,6 +1,9 @@
 # Project specific
 bin/
 
+# macOS
+.DS_Store
+
 # Prerequisites
 *.d
 
