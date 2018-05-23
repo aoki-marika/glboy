@@ -1,7 +1,6 @@
 #include "game.h"
 #include "sdl.h"
 #include "gl.h"
-#include "gfx_constants.h"
 #include "utils.h"
 
 bool gInitialized = false;
@@ -9,6 +8,7 @@ bool gRunning = false;
 
 SDL_Window *gWindow;
 SDL_GLContext gContext;
+GLuint gPaletteTexture;
 
 void (*gRenderCallback)();
 
@@ -56,6 +56,10 @@ bool gbInit()
     glClearColor(1, 1, 1, 1);
     glEnable(GL_TEXTURE_2D);
 
+    // create the palette texture
+    glGenTextures(1, &gPaletteTexture);
+    glBindTexture(GL_TEXTURE_2D, gPaletteTexture);
+
     // check for any OpenGL errors from intializing
     if (glError("initializing OpenGL"))
         return false;
@@ -67,6 +71,12 @@ bool gbInit()
 void gbSetRenderCallback(void (*callback)())
 {
     gRenderCallback = callback;
+}
+
+void gbSetPalette(GLuint colours[PAL_SIZE])
+{
+    glBindTexture(GL_TEXTURE_2D, gPaletteTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, PAL_SIZE, 1, GL_RGBA, GL_UNSIGNED_BYTE, colours);
 }
 
 void update()
@@ -126,6 +136,9 @@ bool gbQuit()
 
     // stop the program if its running
     gRunning = false;
+
+    // delete the palette texture
+    glDeleteTextures(1, &gPaletteTexture);
 
     // quit SDL and OpenGL
     SDL_DestroyWindow(gWindow);

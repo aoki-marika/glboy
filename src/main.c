@@ -28,13 +28,20 @@ int main(int argc, char *argv[])
     };
 
     int pixels[TILE_SIZE];
-    gbLoadImage(bytes, pixels);
-
     GLuint convertedPixels[TILE_SIZE];
-    gbConvertImage(pixels, convertedPixels);
 
+    gbLoadImage(bytes, pixels);
+    gbConvertImage(pixels, convertedPixels);
     gbCreateTexture(&gTex, convertedPixels);
 
+    GLuint palette[PAL_SIZE] = {
+        0xFFFFFFFF,
+        0xAAAAAAFF,
+        0x555555FF,
+        0x000000FF,
+    };
+
+    gbSetPalette(palette);
     gbSetRenderCallback(renderMain);
 
     if (!gbRun())
@@ -42,6 +49,8 @@ int main(int argc, char *argv[])
 
     if (!gbQuit())
         return 1;
+
+    glDeleteTextures(1, &gTex);
 
     return 0;
 }
