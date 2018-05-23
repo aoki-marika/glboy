@@ -1,13 +1,6 @@
 #include "image.h"
 #include "gfx_constants.h"
 
-GLubyte gConvertedColours[4] = {
-    0xFF,
-    0xAA,
-    0x55,
-    0x00,
-};
-
 void gbLoadImage(unsigned char bytes[], int pixels[])
 {
     for (int y = 0; y < TILE_HEIGHT; y++)
@@ -26,6 +19,6 @@ void gbConvertImage(int pixels[], GLuint convertedPixels[])
     for (int i = 0; i < TILE_SIZE; i++)
     {
         GLubyte *colours = (GLubyte *)&convertedPixels[i];
-        colours[0] = gConvertedColours[pixels[i]];
+        colours[0] = pixels[i];
     }
 }
