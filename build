@@ -1,0 +1,1 @@
+gcc -o bin/main src/*.c -Iinclude -framework OpenGL -lSDL2 "$@"
