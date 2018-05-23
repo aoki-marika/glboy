@@ -8,6 +8,7 @@ bool gRunning = false;
 SDL_Window *gWindow;
 SDL_GLContext gContext;
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
+GLfloat gColours[PAL_SIZE][3];
 
 void (*gRenderCallback)();
 
@@ -77,13 +78,14 @@ bool gbInit()
     const GLchar *fragmentSource[] =
     {
         "uniform sampler2D texture; \
-         uniform vec3 palette[4]; \
+         uniform vec3 colours[4]; \
+         uniform int palette[4]; \
          \
          void main() \
          { \
              vec4 texel = texture2D(texture, gl_TexCoord[0].xy); \
              int i = int((texel.r * 255.0) + 0.5); \
-             vec3 p = palette[i]; \
+             vec3 p = colours[palette[i]]; \
              gl_FragColor = vec4(p.r, p.g, p.b, texel.a); \
          }"
     };
@@ -118,24 +120,34 @@ void gbSetRenderCallback(void (*callback)())
     gRenderCallback = callback;
 }
 
-void gbSetPalette(SDL_Color colours[PAL_SIZE])
+void gbSetColours(SDL_Color colours[PAL_SIZE])
 {
-    GLint pal = glGetUniformLocation(gPaletteProgram, "palette");
-
     // convert colours to float vec4s for GLSL
-    GLfloat palColours[PAL_SIZE][3];
+    GLfloat newColours[PAL_SIZE][3];
 
     for (int i = 0; i < PAL_SIZE; i++)
     {
-        palColours[i][0] = colours[i].r / 255.0f;
-        palColours[i][1] = colours[i].g / 255.0f;
-        palColours[i][2] = colours[i].b / 255.0f;
+        newColours[i][0] = colours[i].r / 255.0f;
+        newColours[i][1] = colours[i].g / 255.0f;
+        newColours[i][2] = colours[i].b / 255.0f;
+
+        for (int c = 0; c < 3; c++)
+            gColours[i][c] = newColours[i][c];
     }
 
-    glUniform3fv(pal, PAL_SIZE, (const GLfloat *)palColours);
+    glUniform3fv(glGetUniformLocation(gPaletteProgram, "colours"), PAL_SIZE, (const GLfloat *)newColours);
+    glClearColor(newColours[PAL_WHITE][0],
+                 newColours[PAL_WHITE][1],
+                 newColours[PAL_WHITE][2],
+                 1);
+}
 
-    // update the clear colour to use the palette
-    glClearColor(palColours[0][0], palColours[0][1], palColours[0][2], 1);
+void gbSetPalette(int palette[PAL_SIZE])
+{
+    glUniform1iv(glGetUniformLocation(gPaletteProgram, "palette"), PAL_SIZE, palette);
+
+    int i = palette[PAL_WHITE];
+    glClearColor(gColours[i][0], gColours[i][1], gColours[i][2], 1);
 }
 
 void update()

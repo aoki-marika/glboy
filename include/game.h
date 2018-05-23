@@ -8,6 +8,7 @@
 
 bool gbInit();
 void gbSetRenderCallback(void (*callback)());
-void gbSetPalette(SDL_Color colours[PAL_SIZE]); //todo: multiple palette types
+void gbSetColours(SDL_Color colours[PAL_SIZE]); // screen colours
+void gbSetPalette(int palette[PAL_SIZE]); // map palette index to colour index
 bool gbRun();
 bool gbQuit();
