@@ -38,7 +38,7 @@ bool gbInit()
 {
     if (gInitialized)
     {
-        printf("Cannot initialize GlGB when it was already initialized.");
+        printf("Cannot initialize GlGB when it was already initialized.\n");
         return false;
     }
 
@@ -117,7 +117,7 @@ bool gbRun()
 {
     if (!gInitialized)
     {
-        printf("Cannot run GlGB when it was not initialized.");
+        printf("Cannot run GlGB when it was not initialized.\n");
         return false;
     }
 
@@ -135,7 +135,7 @@ bool gbQuit()
 {
     if (!gInitialized)
     {
-        printf("Cannot quit GlGB when it was not initialized.");
+        printf("Cannot quit GlGB when it was not initialized.\n");
         return false;
     }
 
