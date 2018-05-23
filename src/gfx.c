@@ -42,16 +42,8 @@ bool gbCreateShader(GLuint *shader, GLenum type, const GLchar *source[])
     glCompileShader(*shader);
 
     // check for compilation errors
-    GLint shaderCompiled = GL_FALSE;
-
-    glGetShaderiv(*shader, GL_COMPILE_STATUS, &shaderCompiled);
-
-    if (shaderCompiled != GL_TRUE)
-    {
-        printf("Unable to compile shader '%d'!\n", *shader);
-        gbPrintShaderLog(*shader);
+    if (gbShaderError(*shader, GL_COMPILE_STATUS, "compiling shader"))
         return false;
-    }
 
     return true;
 }
@@ -104,16 +96,32 @@ void gbPrintShaderLog(GLuint shader)
         printf("Given name '%d' is not a shader.\n", shader);
 }
 
-bool gbProgramError(GLuint program, const char *message)
+bool gbProgramError(GLuint program, GLenum pname, const char *message)
 {
     // check for program errors
-    GLint programSuccess = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &programSuccess);
+    GLint check = GL_FALSE;
+    glGetProgramiv(program, pname, &check);
 
-    if (programSuccess != GL_TRUE)
+    if (check != GL_TRUE)
     {
         printf("Error %s '%d'!\n", message, program);
         gbPrintProgramLog(program);
+        return true;
+    }
+
+    return false;
+}
+
+bool gbShaderError(GLuint shader, GLenum pname, const char *message)
+{
+    // check for shader errors
+    GLint check = GL_FALSE;
+    glGetShaderiv(shader, pname, &check);
+
+    if (check != GL_TRUE)
+    {
+        printf("Error %s '%d'!\n", message, shader);
+        gbPrintShaderLog(shader);
         return true;
     }
 

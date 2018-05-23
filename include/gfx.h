@@ -10,4 +10,5 @@ bool gbCreateShader(GLuint *shader, GLenum type, const GLchar *source[]);
 
 void gbPrintProgramLog(GLuint program);
 void gbPrintShaderLog(GLuint shader);
-bool gbProgramError(GLuint program, const char *message);
+bool gbProgramError(GLuint program, GLenum pname, const char *message);
+bool gbShaderError(GLuint shader, GLenum pname, const char *message);

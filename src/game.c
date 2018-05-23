@@ -53,7 +53,7 @@ bool setupPaletteShader()
     glLinkProgram(gPaletteProgram);
 
     // check for program errors
-    if (gbProgramError(gPaletteProgram, "linking program"))
+    if (gbProgramError(gPaletteProgram, GL_LINK_STATUS, "linking program"))
         return false;
 
     // use the palette program
@@ -190,6 +190,7 @@ void render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // activate the paletted texture
+    // todo: only call glGetUniformLocation once
     GLint paletteTexture = glGetUniformLocation(gPaletteProgram, "texture");
     glUniform1i(paletteTexture, 0);
     glActiveTexture(GL_TEXTURE0);
@@ -230,7 +231,7 @@ bool gbQuit()
     // stop the program if its running
     gRunning = false;
 
-    // delete the palette texture and program
+    // delete the palette shaders and program
     glDeleteShader(gPaletteVertexShader);
     glDeleteShader(gPaletteFragmentShader);
     glDeleteProgram(gPaletteProgram);
