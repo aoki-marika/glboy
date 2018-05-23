@@ -73,6 +73,14 @@ int main(int argc, char *argv[])
     gbSetPalette(palette);
     gbSetRenderCallback(renderMain);
 
+    for (int y = 0; y < BG_HEIGHT; y++)
+    {
+        for (int x = 0; x < BG_WIDTH; x++)
+        {
+            gbSetTileMapTile(gbGetBackground(0), x, y, y % 2 ? gWindowTexture : gATexture);
+        }
+    }
+
     if (!gbRun())
         return 1;
 

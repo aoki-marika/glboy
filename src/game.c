@@ -1,16 +1,19 @@
 #include "game.h"
 #include "utils.h"
-#include "gfx.h"
 
 bool gInitialized = false;
 bool gRunning = false;
 
 SDL_Window *gWindow;
 SDL_GLContext gContext;
+
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
 GLint gPaletteProgramColours, gPaletteProgramPalette;
 GLfloat gColours[PAL_SIZE][3];
 int gPalette[PAL_SIZE];
+
+GBTileMap gBackgrounds[BG_COUNT];
+int gActiveBackground;
 
 void (*gRenderCallback)();
 
@@ -68,6 +71,18 @@ bool setupPaletteShader()
     return true;
 }
 
+void setupBackground()
+{
+    for (int i = 0; i < BG_COUNT; i++)
+    {
+        GLuint *tiles = (GLuint *)calloc(BG_SIZE, sizeof(GLuint));
+
+        gBackgrounds[i].width = BG_WIDTH;
+        gBackgrounds[i].height = BG_HEIGHT;
+        gBackgrounds[i].tiles = tiles;
+    }
+}
+
 bool gbInit()
 {
     if (gInitialized)
@@ -123,6 +138,9 @@ bool gbInit()
     if (!setupPaletteShader())
         return false;
 
+    // setup the tile maps
+    setupBackground();
+
     // check for any OpenGL errors from intializing
     if (gbGlError("initializing OpenGL"))
         return false;
@@ -170,6 +188,34 @@ void gbSetPalette(int palette[PAL_SIZE])
     // update gPalette
     for (int i = 0; i < PAL_SIZE; i++)
         gPalette[i] = palette[i];
+}
+
+bool verifyBgIndex(int i)
+{
+    if (i >= BG_COUNT)
+    {
+        printf("Background %i is out of range (max %i)", i, BG_COUNT - 1);
+        return false;
+    }
+
+    return true;
+}
+
+GBTileMap *gbGetBackground(int i)
+{
+    if (!verifyBgIndex(i))
+        return NULL;
+
+    return &gBackgrounds[i];
+}
+
+bool gbSetActiveBackground(int i)
+{
+    if (!verifyBgIndex(i))
+        return false;
+
+    gActiveBackground = i;
+    return true;
 }
 
 void update()
@@ -239,6 +285,10 @@ bool gbQuit()
     SDL_DestroyWindow(gWindow);
     SDL_GL_DeleteContext(gContext);
     SDL_Quit();
+
+    // free all the tile maps
+    for (int i = 0; i < BG_COUNT; i++)
+        free(gBackgrounds[i].tiles);
 
     // reset the initialized state
     gInitialized = false;

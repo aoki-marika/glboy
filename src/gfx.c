@@ -4,6 +4,11 @@
 #include "gfx_constants.h"
 #include "utils.h"
 
+void gbSetTileMapTile(GBTileMap *map, int x, int y, GLuint tile)
+{
+    map->tiles[x + (y * map->width)] = tile;
+}
+
 bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsizei height, GLuint pixels[])
 {
     // generate the texture and set pixel data
