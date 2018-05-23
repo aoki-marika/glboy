@@ -8,4 +8,3 @@ bool gbInit();
 void gbSetRenderCallback(void (*callback)());
 bool gbRun();
 bool gbQuit();
-bool gbCreateTexture(GLuint *texture, GLuint pixels[]);

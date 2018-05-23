@@ -2,6 +2,7 @@
 
 #include "game.h"
 #include "image.h"
+#include "gfx.h"
 #include "gfx_constants.h"
 
 GLuint gTex;
