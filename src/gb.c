@@ -3,6 +3,7 @@
 #include "gl.h"
 #include "gfx_constants.h"
 
+bool initialized = false;
 SDL_Window *gWindow;
 SDL_GLContext gContext;
 
@@ -33,6 +34,12 @@ bool sdlError(const char *message)
 
 bool gbInit()
 {
+    if (initialized)
+    {
+        printf("Cannot initialize GlGB when it was already initialized.");
+        return false;
+    }
+
     // setup SDL
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -64,14 +71,22 @@ bool gbInit()
     if (glError("initializing OpenGL"))
         return false;
 
-    // say we succesfully initalized
+    initialized = true;
     return true;
 }
 
-void gbQuit()
+bool gbQuit()
 {
+    if (!initialized)
+    {
+        printf("Cannot quit GlGB when it was not initialized.");
+        return false;
+    }
+
     // quit SDL and OpenGL
     SDL_DestroyWindow(gWindow);
     SDL_GL_DeleteContext(gContext);
     SDL_Quit();
+
+    return true;
 }

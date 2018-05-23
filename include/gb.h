@@ -3,4 +3,4 @@
 #include <stdbool.h>
 
 bool gbInit();
-void gbQuit();
+bool gbQuit();

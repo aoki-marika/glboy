@@ -7,6 +7,8 @@ int main(int argc, char *argv[])
     if (!gbInit())
         return 1;
 
-    gbQuit();
+    if (!gbQuit())
+        return 1;
+
     return 0;
 }
