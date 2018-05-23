@@ -235,10 +235,67 @@ void update()
     }
 }
 
+// wrap an index to a count
+int wrapi(int value, int max)
+{
+    return value - floor(value / max) * max;
+}
+
+int calculateMapDrawPosition(int pos, int tileSize)
+{
+    int value = wrapi(pos, tileSize);
+
+    if (pos > 0)
+        value -= TILE_WIDTH;
+
+    return value;
+}
+
+void renderTileMap(GBTileMap *map)
+{
+    int drawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
+    int drawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
+
+    // make sure theres one off screen so scrolling
+    int width = TILES_X + 1;
+    int height = TILES_Y + 1;
+
+    printf("%i,%i (%i,%i)\n", drawX, drawY, width, height);
+
+    for (int y = 0; y < height; y++)
+    {
+        printf("%02i: ", y);
+
+        for (int x = 0; x < width; x++)
+        {
+            printf("%i ", x);
+
+            int tx = wrapi(x, map->width);
+            int ty = wrapi(y, map->height);
+
+            int dx = drawX + (x * TILE_WIDTH);
+            int dy = drawY + (y * TILE_HEIGHT);
+
+            glBindTexture(GL_TEXTURE_2D, map->tiles[tx + (ty * map->width)]);
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(dx + TILE_WIDTH, dy + TILE_HEIGHT);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(dx, dy + TILE_HEIGHT);
+            glEnd();
+        }
+
+        printf("\n");
+    }
+}
+
 void render()
 {
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // render the active background
+    renderTileMap(gbGetBackground(gActiveBackground));
 
     if (gRenderCallback)
         gRenderCallback();

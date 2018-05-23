@@ -9,21 +9,24 @@ GLuint gWindowTexture, gATexture;
 
 void renderMain()
 {
-    glBindTexture(GL_TEXTURE_2D, gWindowTexture);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, TILE_HEIGHT);
-    glEnd();
+    gbGetBackground(0)->x += 1;
+    gbGetBackground(0)->y -= 1;
 
-    glBindTexture(GL_TEXTURE_2D, gATexture);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH * 2, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH * 2, TILE_HEIGHT);
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
-    glEnd();
+    // glBindTexture(GL_TEXTURE_2D, gWindowTexture);
+    // glBegin(GL_QUADS);
+    //     glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
+    //     glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
+    //     glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
+    //     glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, TILE_HEIGHT);
+    // glEnd();
+
+    // glBindTexture(GL_TEXTURE_2D, gATexture);
+    // glBegin(GL_QUADS);
+    //     glTexCoord2f(0.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
+    //     glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH * 2, 0.0f);
+    //     glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH * 2, TILE_HEIGHT);
+    //     glTexCoord2f(0.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
+    // glEnd();
 }
 
 int main(int argc, char *argv[])
@@ -77,7 +80,11 @@ int main(int argc, char *argv[])
     {
         for (int x = 0; x < BG_WIDTH; x++)
         {
-            gbSetTileMapTile(gbGetBackground(0), x, y, y % 2 ? gWindowTexture : gATexture);
+            // testing checkerboard
+            if ((x % 2 && !(y % 2)) || (!(x % 2) && y % 2))
+                gbSetTileMapTile(gbGetBackground(0), x, y, gWindowTexture);
+            else
+                gbSetTileMapTile(gbGetBackground(0), x, y, gATexture);
         }
     }
 
