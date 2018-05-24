@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
     {
         for (int x = 0; x < BG_WIDTH; x++)
         {
-            // testing checkerboard
-            if ((x % 2 && !(y % 2)) || (!(x % 2) && y % 2))
-                gbSetTileMapTile(gbGetBackground(0), x, y, gWindowTexture);
-            else
+            // random pattern for scrolling testing
+            if (x % 2 && y % 5)
                 gbSetTileMapTile(gbGetBackground(0), x, y, gATexture);
+            else if (x % 5 && y % 2)
+                gbSetTileMapTile(gbGetBackground(0), x, y, gWindowTexture);
         }
     }
 
