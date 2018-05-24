@@ -261,22 +261,17 @@ int calculateMapStartTile(int pos, int tileSize, int mapSize)
 
 void renderTileMap(GBTileMap *map)
 {
-    // make sure theres a tile offscreen in every direction so scrolling doesnt have artifacts
-
     int drawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
     int drawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
-
-    int width = TILES_X + 1;
-    int height = TILES_Y + 1;
 
     int startTileX = calculateMapStartTile(map->x, TILE_WIDTH, map->width);
     int startTileY = calculateMapStartTile(map->y, TILE_HEIGHT, map->height);
 
-    // printf("| draw: % 2i,% 2i | start tile: %i,%i |\n", drawX, drawY, startTileX, startTileY);
+    // add one to the sizes so that there is always one tile offscreen for smooth scrolling
 
-    for (int y = 0; y < height; y++)
+    for (int y = 0; y < TILES_Y + 1; y++)
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < TILES_X + 1; x++)
         {
             int tx = wrapi(startTileX + x, map->width);
             int ty = wrapi(startTileY + y, map->height);

@@ -11,22 +11,6 @@ void renderMain()
 {
     gbGetBackground(0)->x += 1;
     gbGetBackground(0)->y -= 1;
-
-    // glBindTexture(GL_TEXTURE_2D, gEmptyTexture);
-    // glBegin(GL_QUADS);
-    //     glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, 0.0f);
-    //     glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
-    //     glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
-    //     glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, TILE_HEIGHT);
-    // glEnd();
-
-    // glBindTexture(GL_TEXTURE_2D, gFilledTexture);
-    // glBegin(GL_QUADS);
-    //     glTexCoord2f(0.0f, 0.0f); glVertex2f(TILE_WIDTH, 0.0f);
-    //     glTexCoord2f(1.0f, 0.0f); glVertex2f(TILE_WIDTH * 2, 0.0f);
-    //     glTexCoord2f(1.0f, 1.0f); glVertex2f(TILE_WIDTH * 2, TILE_HEIGHT);
-    //     glTexCoord2f(0.0f, 1.0f); glVertex2f(TILE_WIDTH, TILE_HEIGHT);
-    // glEnd();
 }
 
 int main(int argc, char *argv[])
@@ -79,7 +63,7 @@ int main(int argc, char *argv[])
     GLuint e = gEmptyTexture;
     GLuint f = gFilledTexture;
 
-    GLuint test[BG_WIDTH][BG_HEIGHT] = {
+    GLuint test[BG_HEIGHT][BG_WIDTH] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, f, 0, 0, f, 0, f, f, f, f, 0, f, 0, 0, 0, 0, f, 0, 0, 0, 0, 0, f, f, 0, 0, 0, f, 0, 0, f },
@@ -100,6 +84,7 @@ int main(int argc, char *argv[])
         { f, 0, f, f, f, f, 0, f, 0, 0, f, 0, f, 0, 0, f, 0, f, 0, 0, 0, 0, f, 0, 0, f, 0, 0, 0, 0, 0, f },
         { f, 0, f, 0, 0, f, 0, 0, f, f, 0, 0, f, 0, 0, f, 0, f, f, f, f, 0, f, f, f, 0, 0, 0, e, 0, 0, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
+        { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, f, e, e, e, e, e, e, e, e, e, e, e, e, e, f, e, e, e, e, e, e, e, e, e, e, e, e, e, f, f },
         { f, 0, e, f, 0, 0, 0, 0, 0, e, 0, 0, 0, 0, 0, f, e, f, 0, 0, 0, 0, 0, e, 0, 0, 0, 0, 0, f, e, f },
         { f, 0, e, 0, f, 0, 0, 0, 0, e, 0, 0, 0, 0, f, 0, e, 0, f, 0, 0, 0, 0, e, 0, 0, 0, 0, f, 0, e, f },
@@ -108,6 +93,7 @@ int main(int argc, char *argv[])
         { f, 0, e, 0, 0, 0, 0, f, 0, e, 0, f, 0, 0, 0, 0, e, 0, 0, 0, 0, f, 0, e, 0, f, 0, 0, 0, 0, e, f },
         { f, 0, e, 0, 0, 0, 0, 0, f, e, f, 0, 0, 0, 0, 0, e, 0, 0, 0, 0, 0, f, e, f, 0, 0, 0, 0, 0, e, f },
         { f, 0, e, e, e, e, e, e, e, f, e, e, e, e, e, e, e, e, e, e, e, e, e, f, e, e, e, e, e, e, e, f },
+        { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
     };
