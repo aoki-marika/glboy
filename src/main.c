@@ -5,8 +5,6 @@
 #include "gfx.h"
 #include "gfx_constants.h"
 
-GLuint gEmptyTexture, gFilledTexture;
-
 int gBg;
 
 void renderMain()
@@ -42,11 +40,13 @@ int main(int argc, char *argv[])
     GLuint emptyPixels[TILE_SIZE];
     GLuint filledPixels[TILE_SIZE];
 
+    GLuint e, f;
+
     gbLoadImage(empty, emptyPixels);
-    gbCreateImageTexture(&gEmptyTexture, emptyPixels);
+    gbCreateImageTexture(&e, emptyPixels);
 
     gbLoadImage(filled, filledPixels);
-    gbCreateImageTexture(&gFilledTexture, filledPixels);
+    gbCreateImageTexture(&f, filledPixels);
 
     SDL_Color colours[PAL_SIZE] = {
         // original
@@ -72,9 +72,6 @@ int main(int argc, char *argv[])
     gbSetColours(colours);
     gbSetPalette(palette);
     gbSetRenderCallback(renderMain);
-
-    GLuint e = gEmptyTexture;
-    GLuint f = gFilledTexture;
 
     GLuint testOne[BG_HEIGHT][BG_WIDTH] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
@@ -161,8 +158,8 @@ int main(int argc, char *argv[])
     if (!gbQuit())
         return 1;
 
-    glDeleteTextures(1, &gEmptyTexture);
-    glDeleteTextures(1, &gFilledTexture);
+    glDeleteTextures(1, &e);
+    glDeleteTextures(1, &f);
 
     return 0;
 }

@@ -71,7 +71,7 @@ bool setupPaletteShader()
     return true;
 }
 
-void setupBackground()
+void setupBackgrounds()
 {
     for (int i = 0; i < BG_COUNT; i++)
     {
@@ -139,7 +139,7 @@ bool gbInit()
         return false;
 
     // setup the tile maps
-    setupBackground();
+    setupBackgrounds();
 
     // check for any OpenGL errors from intializing
     if (gbGlError("initializing OpenGL"))
@@ -235,49 +235,48 @@ void update()
     }
 }
 
-// wrap an index to a count
-int wrapi(int value, int max)
+int wrapIndex(int index, int length)
 {
-    int v = value;
+    int i = index;
+    if (i < 0)
+        i += length * (-i / length + 1);
 
-    if (v < 0)
-        v += max * (-v / max + 1);
-
-    return v % max;
+    return i % length;
 }
 
 int calculateMapDrawPosition(int pos, int tileSize)
 {
-    int s = pos > 0 ? tileSize : -tileSize;
-    int r = pos > 0 ? tileSize : 0;
-
-    return wrapi(pos, s) - r;
+    if (pos > 0)
+        return wrapIndex(pos, tileSize) - tileSize;
+    else
+        return wrapIndex(pos, -tileSize);
 }
 
 int calculateMapStartTile(int pos, int tileSize, int mapSize)
 {
-    return wrapi(pos * -1 / tileSize, mapSize);
+    return wrapIndex(pos * -1 / tileSize, mapSize);
 }
 
+// todo: allow disabling wrapping
 void renderTileMap(GBTileMap *map)
 {
-    int drawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
-    int drawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
+    int startDrawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
+    int startDrawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
 
     int startTileX = calculateMapStartTile(map->x, TILE_WIDTH, map->width);
     int startTileY = calculateMapStartTile(map->y, TILE_HEIGHT, map->height);
 
-    // add one to the sizes so that there is always one tile offscreen for smooth scrolling
+    // add 1 to TILES_X/Y so that there is always one tile offscreen for smooth scrolling
 
     for (int y = 0; y < TILES_Y + 1; y++)
     {
         for (int x = 0; x < TILES_X + 1; x++)
         {
-            int tx = wrapi(startTileX + x, map->width);
-            int ty = wrapi(startTileY + y, map->height);
+            int tx = wrapIndex(startTileX + x, map->width);
+            int ty = wrapIndex(startTileY + y, map->height);
 
-            int dx = drawX + (x * TILE_WIDTH);
-            int dy = drawY + (y * TILE_HEIGHT);
+            int dx = startDrawX + (x * TILE_WIDTH);
+            int dy = startDrawY + (y * TILE_HEIGHT);
 
             glBindTexture(GL_TEXTURE_2D, map->tiles[tx + (ty * map->width)]);
             glBegin(GL_QUADS);
