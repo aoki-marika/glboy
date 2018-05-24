@@ -9,8 +9,8 @@ SDL_GLContext gContext;
 
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
 GLint gPaletteProgramColours, gPaletteProgramPalette;
-GLfloat gColours[PAL_SIZE][3];
-int gPalette[PAL_SIZE];
+GLfloat gColours[PAL_COUNT][3];
+int gPalette[PAL_COUNT];
 
 GBTileMap gBackgrounds[BG_COUNT];
 int gActiveBackground;
@@ -154,12 +154,12 @@ void gbSetRenderCallback(void (*callback)())
     gRenderCallback = callback;
 }
 
-void gbSetColours(SDL_Color colours[PAL_SIZE])
+void gbSetColours(SDL_Color colours[PAL_COUNT])
 {
     // convert colours to float vec4s for GLSL
-    GLfloat newColours[PAL_SIZE][3];
+    GLfloat newColours[PAL_COUNT][3];
 
-    for (int i = 0; i < PAL_SIZE; i++)
+    for (int i = 0; i < PAL_COUNT; i++)
     {
         newColours[i][0] = colours[i].r / 255.0f;
         newColours[i][1] = colours[i].g / 255.0f;
@@ -170,23 +170,23 @@ void gbSetColours(SDL_Color colours[PAL_SIZE])
     }
 
     // set the shader colours
-    glUniform3fv(gPaletteProgramColours, PAL_SIZE, (const GLfloat *)newColours);
+    glUniform3fv(gPaletteProgramColours, PAL_COUNT, (const GLfloat *)newColours);
 
     // update the clear colour
     gbSetPalette(gPalette);
 }
 
-void gbSetPalette(int palette[PAL_SIZE])
+void gbSetPalette(int palette[PAL_COUNT])
 {
     // set the shader palette
-    glUniform1iv(gPaletteProgramPalette, PAL_SIZE, palette);
+    glUniform1iv(gPaletteProgramPalette, PAL_COUNT, palette);
 
     // update the clear colour
     int c = palette[PAL_WHITE];
     glClearColor(gColours[c][0], gColours[c][1], gColours[c][2], 1);
 
     // update gPalette
-    for (int i = 0; i < PAL_SIZE; i++)
+    for (int i = 0; i < PAL_COUNT; i++)
         gPalette[i] = palette[i];
 }
 

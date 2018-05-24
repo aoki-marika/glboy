@@ -11,8 +11,8 @@ bool gbInit();
 
 void gbSetRenderCallback(void (*callback)());
 
-void gbSetColours(SDL_Color colours[PAL_SIZE]); // screen colours
-void gbSetPalette(int palette[PAL_SIZE]); // map palette index to colour index
+void gbSetColours(SDL_Color colours[PAL_COUNT]); // screen colours
+void gbSetPalette(int palette[PAL_COUNT]); // map palette index to colour index
 
 GBTileMap *gbGetBackground(int i);
 bool gbSetActiveBackground(int i);

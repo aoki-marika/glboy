@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     gbLoadImage(filled, filledPixels);
     gbCreateImageTexture(&f, filledPixels);
 
-    SDL_Color colours[PAL_SIZE] = {
+    SDL_Color colours[PAL_COUNT] = {
         // original
         // { 255, 255, 255 },
         // { 170, 170, 170 },
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         { 5, 24, 32 },
     };
 
-    int palette[PAL_SIZE] = {
+    int palette[PAL_COUNT] = {
         PAL_WHITE,
         PAL_LGREY,
         PAL_DGREY,
