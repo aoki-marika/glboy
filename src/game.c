@@ -238,17 +238,25 @@ void update()
 // wrap an index to a count
 int wrapi(int value, int max)
 {
-    return value - floor(value / max) * max;
+    int v = value;
+
+    if (v < 0)
+        v += max * (-v / max + 1);
+
+    return v % max;
 }
 
 int calculateMapDrawPosition(int pos, int tileSize)
 {
-    int value = wrapi(pos, tileSize);
+    int s = pos > 0 ? tileSize : -tileSize;
+    int r = pos > 0 ? tileSize : 0;
 
-    if (pos > 0)
-        value -= TILE_WIDTH;
+    return wrapi(pos, s) - r;
+}
 
-    return value;
+int calculateMapStartTile(int pos, int tileSize, int mapSize)
+{
+    return wrapi(pos * -1 / tileSize, mapSize);
 }
 
 void renderTileMap(GBTileMap *map)
@@ -261,8 +269,10 @@ void renderTileMap(GBTileMap *map)
     int width = TILES_X + 1;
     int height = TILES_Y + 1;
 
-    int startTileX = abs(map->x) / TILE_WIDTH;
-    int startTileY = abs(map->y) / TILE_WIDTH;
+    int startTileX = calculateMapStartTile(map->x, TILE_WIDTH, map->width);
+    int startTileY = calculateMapStartTile(map->y, TILE_HEIGHT, map->height);
+
+    // printf("| draw: % 2i,% 2i | start tile: %i,%i |\n", drawX, drawY, startTileX, startTileY);
 
     for (int y = 0; y < height; y++)
     {
