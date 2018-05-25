@@ -395,15 +395,40 @@ int calculateMapStartTile(int pos, int tileSize, int mapSize)
     return wrapIndex(-pos / tileSize, mapSize);
 }
 
-void renderTile(int dataType, int dataIndex, int x, int y)
+float scaleForFlip(bool flip)
+{
+    return flip ? -1.0f : 1.0f;
+}
+
+float translateForFlip(bool flip, int pos, int size)
+{
+    return flip ? -pos * 2 - size : 0.0f;
+}
+
+void renderTile(int dataType, int dataIndex, int x, int y, bool flipX, bool flipY)
 {
     glBindTexture(GL_TEXTURE_2D, gTileData[dataType][dataIndex]);
+
+    if (flipX || flipY)
+    {
+        glPushMatrix();
+            glScalef(scaleForFlip(flipX),
+                     scaleForFlip(flipY),
+                     1.0f);
+            glTranslatef(translateForFlip(flipX, x, TILE_WIDTH),
+                         translateForFlip(flipY, y, TILE_HEIGHT),
+                         0.0f);
+    }
+
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex2f(x, y);
         glTexCoord2f(1.0f, 0.0f); glVertex2f(x + TILE_WIDTH, y);
         glTexCoord2f(1.0f, 1.0f); glVertex2f(x + TILE_WIDTH, y + TILE_HEIGHT);
         glTexCoord2f(0.0f, 1.0f); glVertex2f(x, y + TILE_HEIGHT);
     glEnd();
+
+    if (flipX || flipY)
+        glPopMatrix();
 }
 
 void renderTileMap(GBTileMap *map, int dataType, bool wrap)
@@ -428,7 +453,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = startDrawX + (x * TILE_WIDTH);
                 int dy = startDrawY + (y * TILE_HEIGHT);
 
-                renderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy);
+                renderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy, false, false);
             }
         }
     }
@@ -443,7 +468,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = map->x + (x * TILE_WIDTH);
                 int dy = map->y + (y * TILE_HEIGHT);
 
-                renderTile(dataType, map->tiles[x + (y * map->width)], dx, dy);
+                renderTile(dataType, map->tiles[x + (y * map->width)], dx, dy, false, false);
             }
         }
     }
@@ -478,13 +503,15 @@ void render()
     {
         GBSprite *s = gActiveSprites[i];
 
+        // apply the palette
         if (s->palette != currentSpritePalette)
         {
             currentSpritePalette = s->palette;
             setShaderPalette(gSpritePalettes[currentSpritePalette]);
         }
 
-        renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y);
+        // render the sprite
+        renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, s->flipX, s->flipY);
     }
 
     // reset the transparency flag

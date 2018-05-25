@@ -234,29 +234,43 @@ int main(int argc, char *argv[])
     }
 
     // test sprites
-    unsigned char ball[] = {
-        0x3C, 0x00, 0x42, 0x3C, 0x81, 0x7E, 0x81, 0x7E, 0x81, 0x7E, 0x81, 0x7E, 0x42, 0x3C, 0x3C, 0x00
+    unsigned char arrowUpLeft[] = {
+        0x55, 0xEE, 0xAA, 0xDC, 0x54, 0xB8, 0xA8, 0x70, 0x50, 0xE0, 0xA0, 0xC0, 0x40, 0x80, 0x80, 0x00
     };
 
-    GLuint ballPixels[TILE_SIZE];
-    int b = 1;
+    unsigned char arrowDownRight[] = {
+        0x01, 0x00, 0x02, 0x01, 0x05, 0x03, 0x0A, 0x07, 0x15, 0x0E, 0x2A, 0x1D, 0x55, 0x3B, 0xAA, 0x77
+    };
 
-    gbLoadImage(ball, ballPixels);
-    if (!gbSetTileData(TILE_DATA_SPRITE, b, ballPixels))
+    GLuint arrowUpLeftPixels[TILE_SIZE];
+    GLuint arrowDownRightPixels[TILE_SIZE];
+
+    int u = 1;
+    int d = 2;
+
+    gbLoadImage(arrowUpLeft, arrowUpLeftPixels);
+    if (!gbSetTileData(TILE_DATA_SPRITE, u, arrowUpLeftPixels))
+        return 1;
+
+    gbLoadImage(arrowDownRight, arrowDownRightPixels);
+    if (!gbSetTileData(TILE_DATA_SPRITE, d, arrowDownRightPixels))
         return 1;
 
     GBSprite testSpriteOne = {
         .x = 10,
         .y = 10,
-        .tile = b,
+        .tile = u,
         .palette = 0,
+        .flipX = true,
     };
 
     GBSprite testSpriteTwo = {
         .x = 30,
         .y = 10,
-        .tile = b,
+        .tile = d,
         .palette = 1,
+        .flipX = true,
+        .flipY = true,
     };
 
     if (!gbAddSprite(&testSpriteOne) ||
