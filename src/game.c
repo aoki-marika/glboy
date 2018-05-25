@@ -8,7 +8,7 @@ SDL_Window *gWindow;
 SDL_GLContext gContext;
 
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
-GLint gPaletteProgramColours, gPaletteProgramPalette;
+GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramTransparency;
 GLfloat gColours[PAL_COUNT][3];
 int gPalette[PAL_COUNT];
 
@@ -44,13 +44,19 @@ bool setupPaletteShader()
         "uniform sampler2D texture; \
          uniform vec3 colours[4]; \
          uniform int palette[4]; \
+         uniform bool transparency; \
          \
          void main() \
          { \
              vec4 texel = texture2D(texture, gl_TexCoord[0].xy); \
              int i = int((texel.r * 255.0) + 0.5); \
              vec3 p = colours[palette[i]]; \
-             gl_FragColor = vec4(p.r, p.g, p.b, texel.a); \
+             \
+             float a = texel.a; \
+             if (transparency && palette[i] == 0) \
+                a = 0.0; \
+             \
+             gl_FragColor = vec4(p.r, p.g, p.b, a); \
          }"
     };
 
@@ -74,6 +80,7 @@ bool setupPaletteShader()
     // get all the uniforms
     gPaletteProgramColours = glGetUniformLocation(gPaletteProgram, "colours");
     gPaletteProgramPalette = glGetUniformLocation(gPaletteProgram, "palette");
+    gPaletteProgramTransparency = glGetUniformLocation(gPaletteProgram, "transparency");
 
     // say the setup was successful
     return true;
@@ -147,6 +154,8 @@ bool gbInit()
 
     // setup the scene
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // setup the palette shadewr
     if (!setupPaletteShader())
@@ -373,10 +382,19 @@ int calculateMapStartTile(int pos, int tileSize, int mapSize)
     return wrapIndex(-pos / tileSize, mapSize);
 }
 
+void renderTile(int dataType, int dataIndex, int x, int y)
+{
+    glBindTexture(GL_TEXTURE_2D, gTileData[dataType][dataIndex]);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(x, y);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(x + TILE_WIDTH, y);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(x + TILE_WIDTH, y + TILE_HEIGHT);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(x, y + TILE_HEIGHT);
+    glEnd();
+}
+
 void renderTileMap(GBTileMap *map, int dataType, bool wrap)
 {
-    GLuint *data = gTileData[dataType];
-
     if (wrap)
     {
         int startDrawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
@@ -397,13 +415,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = startDrawX + (x * TILE_WIDTH);
                 int dy = startDrawY + (y * TILE_HEIGHT);
 
-                glBindTexture(GL_TEXTURE_2D, data[map->tiles[tx + (ty * map->width)]]);
-                glBegin(GL_QUADS);
-                    glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
-                    glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
-                    glTexCoord2f(1.0f, 1.0f); glVertex2f(dx + TILE_WIDTH, dy + TILE_HEIGHT);
-                    glTexCoord2f(0.0f, 1.0f); glVertex2f(dx, dy + TILE_HEIGHT);
-                glEnd();
+                renderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy);
             }
         }
     }
@@ -418,13 +430,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = map->x + (x * TILE_WIDTH);
                 int dy = map->y + (y * TILE_HEIGHT);
 
-                glBindTexture(GL_TEXTURE_2D, data[map->tiles[x + (y * map->width)]]);
-                glBegin(GL_QUADS);
-                    glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
-                    glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
-                    glTexCoord2f(1.0f, 1.0f); glVertex2f(dx + TILE_WIDTH, dy + TILE_HEIGHT);
-                    glTexCoord2f(0.0f, 1.0f); glVertex2f(dx, dy + TILE_HEIGHT);
-                glEnd();
+                renderTile(dataType, map->tiles[x + (y * map->width)], dx, dy);
             }
         }
     }
@@ -438,6 +444,20 @@ void render()
     // render the active background and window
     renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
     renderTileMap(gbGetWindow(gActiveWindow), TILE_DATA_BG, false);
+
+    // set the transparency flag for sprites
+    glUniform1i(gPaletteProgramTransparency, GL_TRUE);
+
+    // render sprites
+    for (int i = 0; i < gActiveSpriteCount; i++)
+    {
+        GBSprite *s = gActiveSprites[i];
+
+        renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y);
+    }
+
+    // reset the transparency flag
+    glUniform1i(gPaletteProgramTransparency, GL_FALSE);
 
     if (gRenderCallback)
         gRenderCallback();
