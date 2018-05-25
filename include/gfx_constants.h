@@ -10,7 +10,7 @@
 #define SCREEN_WIDTH TILE_WIDTH * TILES_X
 #define SCREEN_HEIGHT TILE_HEIGHT * TILES_Y
 
-#define PAL_COUNT 4
+#define PAL_LENGTH 4
 #define PAL_WHITE 0
 #define PAL_LGREY 1
 #define PAL_DGREY 2
@@ -30,3 +30,4 @@
 #define TILE_DATA_SPRITE 1
 
 #define SPRITE_COUNT 40
+#define SPRITE_PAL_COUNT 2

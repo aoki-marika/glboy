@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         !gbSetTileData(TILE_DATA_BG, f, filledPixels))
         return 1;
 
-    SDL_Color colours[PAL_COUNT] = {
+    SDL_Color colours[PAL_LENGTH] = {
         // original
         // { 255, 255, 255 },
         // { 170, 170, 170 },
@@ -69,15 +69,31 @@ int main(int argc, char *argv[])
         { 5, 24, 32 },
     };
 
-    int palette[PAL_COUNT] = {
+    int palette[PAL_LENGTH] = {
         PAL_WHITE,
         PAL_LGREY,
         PAL_DGREY,
         PAL_BLACK,
     };
 
+    int spritePaletteOne[PAL_LENGTH] = {
+        PAL_WHITE,
+        PAL_DGREY,
+        PAL_LGREY,
+        PAL_BLACK,
+    };
+
+    int spritePaletteTwo[PAL_LENGTH] = {
+        PAL_DGREY,
+        PAL_BLACK,
+        PAL_WHITE,
+        PAL_LGREY,
+    };
+
     gbSetColours(colours);
-    gbSetPalette(palette);
+    gbSetBackgroundPalette(palette);
+    gbSetSpritePalette(0, spritePaletteOne);
+    gbSetSpritePalette(1, spritePaletteTwo);
     gbSetRenderCallback(renderMain);
 
     // test backgrounds
@@ -233,12 +249,14 @@ int main(int argc, char *argv[])
         .x = 10,
         .y = 10,
         .tile = b,
+        .palette = 0,
     };
 
     GBSprite testSpriteTwo = {
         .x = 30,
         .y = 10,
         .tile = b,
+        .palette = 1,
     };
 
     if (!gbAddSprite(&testSpriteOne) ||

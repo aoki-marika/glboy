@@ -9,8 +9,9 @@ SDL_GLContext gContext;
 
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
 GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramTransparency;
-GLfloat gColours[PAL_COUNT][3];
-int gPalette[PAL_COUNT];
+GLfloat gColours[PAL_LENGTH][3];
+int gBackgroundPalette[PAL_LENGTH];
+int gSpritePalettes[SPRITE_PAL_COUNT][PAL_LENGTH];
 
 GLuint *gTileData[TILE_DATA_COUNT];
 
@@ -53,7 +54,7 @@ bool setupPaletteShader()
              vec3 p = colours[palette[i]]; \
              \
              float a = texel.a; \
-             if (transparency && palette[i] == 0) \
+             if (transparency && i == 0) \
                 a = 0.0; \
              \
              gl_FragColor = vec4(p.r, p.g, p.b, a); \
@@ -178,12 +179,12 @@ void gbSetRenderCallback(void (*callback)())
     gRenderCallback = callback;
 }
 
-void gbSetColours(SDL_Color colours[PAL_COUNT])
+void gbSetColours(SDL_Color colours[PAL_LENGTH])
 {
     // convert colours to float vec4s for GLSL
-    GLfloat newColours[PAL_COUNT][3];
+    GLfloat newColours[PAL_LENGTH][3];
 
-    for (int i = 0; i < PAL_COUNT; i++)
+    for (int i = 0; i < PAL_LENGTH; i++)
     {
         newColours[i][0] = colours[i].r / 255.0f;
         newColours[i][1] = colours[i].g / 255.0f;
@@ -194,24 +195,36 @@ void gbSetColours(SDL_Color colours[PAL_COUNT])
     }
 
     // set the shader colours
-    glUniform3fv(gPaletteProgramColours, PAL_COUNT, (const GLfloat *)newColours);
+    glUniform3fv(gPaletteProgramColours, PAL_LENGTH, (const GLfloat *)newColours);
 
     // update the clear colour
-    gbSetPalette(gPalette);
+    gbSetBackgroundPalette(gBackgroundPalette);
 }
 
-void gbSetPalette(int palette[PAL_COUNT])
+void gbSetBackgroundPalette(int palette[PAL_LENGTH])
 {
-    // set the shader palette
-    glUniform1iv(gPaletteProgramPalette, PAL_COUNT, palette);
+    // update the palette
+    for (int i = 0; i < PAL_LENGTH; i++)
+        gBackgroundPalette[i] = palette[i];
 
     // update the clear colour
     int c = palette[PAL_WHITE];
     glClearColor(gColours[c][0], gColours[c][1], gColours[c][2], 1);
+}
 
-    // update gPalette
-    for (int i = 0; i < PAL_COUNT; i++)
-        gPalette[i] = palette[i];
+bool gbSetSpritePalette(int index, int palette[PAL_LENGTH])
+{
+    if (index >= SPRITE_PAL_COUNT)
+    {
+        printf("Sprite palette index %i is out of range (%i).", index, SPRITE_PAL_COUNT);
+        return false;
+    }
+
+    // update the palette
+    for (int i = 0; i < PAL_LENGTH; i++)
+        gSpritePalettes[index][i] = palette[i];
+
+    return true;
 }
 
 bool gbSetTileData(int type, int index, GLuint data[])
@@ -436,10 +449,20 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
     }
 }
 
+void setShaderPalette(int palette[PAL_LENGTH])
+{
+    glUniform1iv(gPaletteProgramPalette, PAL_LENGTH, palette);
+}
+
+//todo: verify values from structs
+
 void render()
 {
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // set the BG palette
+    setShaderPalette(gBackgroundPalette);
 
     // render the active background and window
     renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
@@ -449,9 +472,17 @@ void render()
     glUniform1i(gPaletteProgramTransparency, GL_TRUE);
 
     // render sprites
+    int currentSpritePalette = -1;
+
     for (int i = 0; i < gActiveSpriteCount; i++)
     {
         GBSprite *s = gActiveSprites[i];
+
+        if (s->palette != currentSpritePalette)
+        {
+            currentSpritePalette = s->palette;
+            setShaderPalette(gSpritePalettes[currentSpritePalette]);
+        }
 
         renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y);
     }

@@ -11,8 +11,11 @@ bool gbInit();
 
 void gbSetRenderCallback(void (*callback)());
 
-void gbSetColours(SDL_Color colours[PAL_COUNT]); //screen colours
-void gbSetPalette(int palette[PAL_COUNT]); //map palette index to colour index
+void gbSetColours(SDL_Color colours[PAL_LENGTH]); //screen colours
+
+// map palette index to colour index
+void gbSetBackgroundPalette(int palette[PAL_LENGTH]); //background and window
+bool gbSetSpritePalette(int index, int palette[PAL_LENGTH]);
 
 bool gbSetTileData(int type, int index, GLuint data[]);
 
