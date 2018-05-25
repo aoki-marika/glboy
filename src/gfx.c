@@ -4,7 +4,7 @@
 #include "gfx_constants.h"
 #include "utils.h"
 
-void gbSetTileMapTile(GBTileMap *map, int x, int y, GLuint tile)
+void gbSetTileMapTile(GBTileMap *map, int x, int y, int tile)
 {
     map->tiles[x + (y * map->width)] = tile;
 }

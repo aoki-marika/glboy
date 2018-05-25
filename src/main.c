@@ -46,13 +46,14 @@ int main(int argc, char *argv[])
     GLuint emptyPixels[TILE_SIZE];
     GLuint filledPixels[TILE_SIZE];
 
-    GLuint e, f;
+    int e = 1, f = 2;
 
     gbLoadImage(empty, emptyPixels);
-    gbCreateImageTexture(&e, emptyPixels);
-
     gbLoadImage(filled, filledPixels);
-    gbCreateImageTexture(&f, filledPixels);
+
+    if (!gbSetTileData(TILE_DATA_BG, e, emptyPixels) ||
+        !gbSetTileData(TILE_DATA_BG, f, filledPixels))
+        return 1;
 
     SDL_Color colours[PAL_COUNT] = {
         // original
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
 
     // test backgrounds
 
-    GLuint testBgOne[BG_HEIGHT][BG_WIDTH] = {
+    int testBgOne[BG_HEIGHT][BG_WIDTH] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, f, 0, 0, f, 0, f, f, f, f, 0, f, 0, 0, 0, 0, f, 0, 0, 0, 0, 0, f, f, 0, 0, 0, f, 0, 0, f },
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
     };
 
-    GLuint testBgTwo[BG_HEIGHT][BG_WIDTH] = {
+    int testBgTwo[BG_HEIGHT][BG_WIDTH] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, f },
         { f, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f },
@@ -169,10 +170,10 @@ int main(int argc, char *argv[])
     gbGetWindow(0)->width = testWinOneWidth;
     gbGetWindow(0)->height = testWinOneHeight;
 
-    GLuint *testWinOneTiles = (GLuint *)calloc(testWinOneWidth * testWinOneHeight, sizeof(GLuint));
+    int *testWinOneTiles = (int *)calloc(testWinOneWidth * testWinOneHeight, sizeof(int));
     gbGetWindow(0)->tiles = testWinOneTiles;
 
-    GLuint testWinOne[testWinOneHeight][testWinOneWidth] = {
+    int testWinOne[testWinOneHeight][testWinOneWidth] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, 0, f },
@@ -197,10 +198,10 @@ int main(int argc, char *argv[])
     gbGetWindow(1)->width = testWinTwoWidth;
     gbGetWindow(1)->height = testWinTwoHeight;
 
-    GLuint *testWinTwoTiles = (GLuint *)calloc(testWinTwoWidth * testWinTwoHeight, sizeof(GLuint));
+    int *testWinTwoTiles = (int *)calloc(testWinTwoWidth * testWinTwoHeight, sizeof(int));
     gbGetWindow(1)->tiles = testWinTwoTiles;
 
-    GLuint testWinTwo[testWinTwoHeight][testWinTwoWidth] = {
+    int testWinTwo[testWinTwoHeight][testWinTwoWidth] = {
         { f, f, f, f, f },
         { f, 0, 0, 0, f },
         { f, 0, e, 0, f },
@@ -221,9 +222,6 @@ int main(int argc, char *argv[])
 
     if (!gbQuit())
         return 1;
-
-    glDeleteTextures(1, &e);
-    glDeleteTextures(1, &f);
 
     free(testWinOneTiles);
     free(testWinTwoTiles);

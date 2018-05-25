@@ -10,10 +10,10 @@ typedef struct
     int height;
     int x;
     int y;
-    GLuint *tiles;
+    int *tiles;
 } GBTileMap;
 
-void gbSetTileMapTile(GBTileMap *map, int x, int y, GLuint tile);
+void gbSetTileMapTile(GBTileMap *map, int x, int y, int tile);
 
 bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsizei height, GLuint pixels[]);
 bool gbCreateImageTexture(GLuint *texture, GLuint pixels[]);

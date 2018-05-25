@@ -12,6 +12,8 @@ GLint gPaletteProgramColours, gPaletteProgramPalette;
 GLfloat gColours[PAL_COUNT][3];
 int gPalette[PAL_COUNT];
 
+GLuint *gTileData[TILE_DATA_COUNT];
+
 GBTileMap gBackgrounds[BG_COUNT];
 int gActiveBackground;
 
@@ -74,11 +76,17 @@ bool setupPaletteShader()
     return true;
 }
 
+void setupTileData()
+{
+    for (int i = 0; i < TILE_DATA_COUNT; i++)
+        gTileData[i] = (GLuint *)calloc(TILE_DATA_TILE_COUNT, sizeof(GLuint));
+}
+
 void setupBackgrounds()
 {
     for (int i = 0; i < BG_COUNT; i++)
     {
-        GLuint *tiles = (GLuint *)calloc(BG_SIZE, sizeof(GLuint));
+        int *tiles = (int *)calloc(BG_SIZE, sizeof(int));
 
         gBackgrounds[i].width = BG_WIDTH;
         gBackgrounds[i].height = BG_HEIGHT;
@@ -141,7 +149,8 @@ bool gbInit()
     if (!setupPaletteShader())
         return false;
 
-    // setup the tile maps
+    // setup the tile data and maps
+    setupTileData();
     setupBackgrounds();
 
     // check for any OpenGL errors from intializing
@@ -191,6 +200,31 @@ void gbSetPalette(int palette[PAL_COUNT])
     // update gPalette
     for (int i = 0; i < PAL_COUNT; i++)
         gPalette[i] = palette[i];
+}
+
+bool gbSetTileData(int type, int i, GLuint data[])
+{
+    if (type >= TILE_DATA_COUNT)
+    {
+        printf("Tile data type %i is out of range (%i).\n", type, TILE_DATA_COUNT);
+        return false;
+    }
+
+    if (i >= TILE_DATA_TILE_COUNT)
+    {
+        printf("Tile data index %i is out of range (%i).\n", i, TILE_DATA_TILE_COUNT);
+        return false;
+    }
+
+    GLuint *tile = &gTileData[type][i];
+
+    // delete any existing texture, if there is one
+    if (tile != 0)
+        glDeleteTextures(1, tile);
+
+    gbCreateImageTexture(tile, data);
+
+    return true;
 }
 
 bool verifyBgIndex(int i)
@@ -288,8 +322,10 @@ int calculateMapStartTile(int pos, int tileSize, int mapSize)
     return wrapIndex(-pos / tileSize, mapSize);
 }
 
-void renderTileMap(GBTileMap *map, bool wrap)
+void renderTileMap(GBTileMap *map, int dataType, bool wrap)
 {
+    GLuint *data = gTileData[dataType];
+
     if (wrap)
     {
         int startDrawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
@@ -310,7 +346,7 @@ void renderTileMap(GBTileMap *map, bool wrap)
                 int dx = startDrawX + (x * TILE_WIDTH);
                 int dy = startDrawY + (y * TILE_HEIGHT);
 
-                glBindTexture(GL_TEXTURE_2D, map->tiles[tx + (ty * map->width)]);
+                glBindTexture(GL_TEXTURE_2D, data[map->tiles[tx + (ty * map->width)]]);
                 glBegin(GL_QUADS);
                     glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
                     glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
@@ -331,7 +367,7 @@ void renderTileMap(GBTileMap *map, bool wrap)
                 int dx = map->x + (x * TILE_WIDTH);
                 int dy = map->y + (y * TILE_HEIGHT);
 
-                glBindTexture(GL_TEXTURE_2D, map->tiles[x + (y * map->width)]);
+                glBindTexture(GL_TEXTURE_2D, data[map->tiles[x + (y * map->width)]]);
                 glBegin(GL_QUADS);
                     glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
                     glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
@@ -349,8 +385,8 @@ void render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render the active background and window
-    renderTileMap(gbGetBackground(gActiveBackground), true);
-    renderTileMap(gbGetWindow(gActiveWindow), false);
+    renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
+    renderTileMap(gbGetWindow(gActiveWindow), TILE_DATA_BG, false);
 
     if (gRenderCallback)
         gRenderCallback();
@@ -401,6 +437,13 @@ bool gbQuit()
     // free all the tile maps
     for (int i = 0; i < BG_COUNT; i++)
         free(gBackgrounds[i].tiles);
+
+    // free all the tile data
+    for (int i = 0; i < TILE_DATA_COUNT; i++)
+    {
+        glDeleteTextures(TILE_DATA_TILE_COUNT, gTileData[i]);
+        free(gTileData[i]);
+    }
 
     // reset the initialized state
     gInitialized = false;

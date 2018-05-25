@@ -22,3 +22,7 @@
 #define BG_WIDTH 32
 #define BG_HEIGHT 32
 #define BG_SIZE BG_WIDTH * BG_HEIGHT
+
+#define TILE_DATA_COUNT 1
+#define TILE_DATA_TILE_COUNT 256
+#define TILE_DATA_BG 0
