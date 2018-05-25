@@ -17,6 +17,8 @@
 #define PAL_BLACK 3
 
 #define BG_COUNT 2
+#define WIN_COUNT 2
+
 #define BG_WIDTH 32
 #define BG_HEIGHT 32
 #define BG_SIZE BG_WIDTH * BG_HEIGHT

@@ -15,6 +15,9 @@ int gPalette[PAL_COUNT];
 GBTileMap gBackgrounds[BG_COUNT];
 int gActiveBackground;
 
+GBTileMap gWindows[WIN_COUNT];
+int gActiveWindow;
+
 void (*gRenderCallback)();
 
 bool setupPaletteShader()
@@ -194,7 +197,7 @@ bool verifyBgIndex(int i)
 {
     if (i >= BG_COUNT)
     {
-        printf("Background %i is out of range (max %i)", i, BG_COUNT - 1);
+        printf("Background %i is out of range (%i)", i, BG_COUNT);
         return false;
     }
 
@@ -215,6 +218,34 @@ bool gbSetActiveBackground(int i)
         return false;
 
     gActiveBackground = i;
+    return true;
+}
+
+bool verifyWinIndex(int i)
+{
+    if (i >= WIN_COUNT)
+    {
+        printf("Window %i is out of range (%i)", i, WIN_COUNT);
+        return false;
+    }
+
+    return true;
+}
+
+GBTileMap *gbGetWindow(int i)
+{
+    if (!verifyWinIndex(i))
+        return NULL;
+
+    return &gWindows[i];
+}
+
+bool gbSetActiveWindow(int i)
+{
+    if (!verifyWinIndex(i))
+        return false;
+
+    gActiveWindow = i;
     return true;
 }
 
@@ -254,37 +285,60 @@ int calculateMapDrawPosition(int pos, int tileSize)
 
 int calculateMapStartTile(int pos, int tileSize, int mapSize)
 {
-    return wrapIndex(pos * -1 / tileSize, mapSize);
+    return wrapIndex(-pos / tileSize, mapSize);
 }
 
-// todo: allow disabling wrapping
-void renderTileMap(GBTileMap *map)
+void renderTileMap(GBTileMap *map, bool wrap)
 {
-    int startDrawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
-    int startDrawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
-
-    int startTileX = calculateMapStartTile(map->x, TILE_WIDTH, map->width);
-    int startTileY = calculateMapStartTile(map->y, TILE_HEIGHT, map->height);
-
-    // add 1 to TILES_X/Y so that there is always one tile offscreen for smooth scrolling
-
-    for (int y = 0; y < TILES_Y + 1; y++)
+    if (wrap)
     {
-        for (int x = 0; x < TILES_X + 1; x++)
+        int startDrawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
+        int startDrawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
+
+        int startTileX = calculateMapStartTile(map->x, TILE_WIDTH, map->width);
+        int startTileY = calculateMapStartTile(map->y, TILE_HEIGHT, map->height);
+
+        // add 1 to TILES_X/Y so that there is always one tile offscreen for smooth scrolling
+
+        for (int y = 0; y < TILES_Y + 1; y++)
         {
-            int tx = wrapIndex(startTileX + x, map->width);
-            int ty = wrapIndex(startTileY + y, map->height);
+            for (int x = 0; x < TILES_X + 1; x++)
+            {
+                int tx = wrapIndex(startTileX + x, map->width);
+                int ty = wrapIndex(startTileY + y, map->height);
 
-            int dx = startDrawX + (x * TILE_WIDTH);
-            int dy = startDrawY + (y * TILE_HEIGHT);
+                int dx = startDrawX + (x * TILE_WIDTH);
+                int dy = startDrawY + (y * TILE_HEIGHT);
 
-            glBindTexture(GL_TEXTURE_2D, map->tiles[tx + (ty * map->width)]);
-            glBegin(GL_QUADS);
-                glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
-                glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
-                glTexCoord2f(1.0f, 1.0f); glVertex2f(dx + TILE_WIDTH, dy + TILE_HEIGHT);
-                glTexCoord2f(0.0f, 1.0f); glVertex2f(dx, dy + TILE_HEIGHT);
-            glEnd();
+                glBindTexture(GL_TEXTURE_2D, map->tiles[tx + (ty * map->width)]);
+                glBegin(GL_QUADS);
+                    glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
+                    glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
+                    glTexCoord2f(1.0f, 1.0f); glVertex2f(dx + TILE_WIDTH, dy + TILE_HEIGHT);
+                    glTexCoord2f(0.0f, 1.0f); glVertex2f(dx, dy + TILE_HEIGHT);
+                glEnd();
+            }
+        }
+    }
+    else
+    {
+        // non-wrapped maps are typically only onscreen, so dont bother clipping
+
+        for (int y = 0; y < map->height; y++)
+        {
+            for (int x = 0; x < map->width; x++)
+            {
+                int dx = map->x + (x * TILE_WIDTH);
+                int dy = map->y + (y * TILE_HEIGHT);
+
+                glBindTexture(GL_TEXTURE_2D, map->tiles[x + (y * map->width)]);
+                glBegin(GL_QUADS);
+                    glTexCoord2f(0.0f, 0.0f); glVertex2f(dx, dy);
+                    glTexCoord2f(1.0f, 0.0f); glVertex2f(dx + TILE_WIDTH, dy);
+                    glTexCoord2f(1.0f, 1.0f); glVertex2f(dx + TILE_WIDTH, dy + TILE_HEIGHT);
+                    glTexCoord2f(0.0f, 1.0f); glVertex2f(dx, dy + TILE_HEIGHT);
+                glEnd();
+            }
         }
     }
 }
@@ -294,8 +348,9 @@ void render()
     // clear the colour buffer
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // render the active background
-    renderTileMap(gbGetBackground(gActiveBackground));
+    // render the active background and window
+    renderTileMap(gbGetBackground(gActiveBackground), true);
+    renderTileMap(gbGetWindow(gActiveWindow), false);
 
     if (gRenderCallback)
         gRenderCallback();

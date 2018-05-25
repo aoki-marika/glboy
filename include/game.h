@@ -17,5 +17,8 @@ void gbSetPalette(int palette[PAL_COUNT]); // map palette index to colour index
 GBTileMap *gbGetBackground(int i);
 bool gbSetActiveBackground(int i);
 
+GBTileMap *gbGetWindow(int i);
+bool gbSetActiveWindow(int i);
+
 bool gbRun();
 bool gbQuit();

@@ -152,6 +152,34 @@ int main(int argc, char *argv[])
         }
     }
 
+    // gbGetWindow(0)->y = (TILES_Y - 6) * TILE_HEIGHT;
+
+    gbGetWindow(0)->x = ((TILES_Y / 2) * TILE_HEIGHT) - TILE_WIDTH / 2;
+    gbGetWindow(0)->y = (-3 * TILE_HEIGHT) - TILE_HEIGHT / 2;
+
+    gbGetWindow(0)->width = TILES_X;
+    gbGetWindow(0)->height = 6;
+
+    GLuint *testWinTiles = (GLuint *)calloc(TILES_X * 6, sizeof(GLuint));
+    gbGetWindow(0)->tiles = testWinTiles;
+
+    GLuint testWinOne[6][TILES_X] = {
+        { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
+        { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
+        { f, 0, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, 0, f },
+        { f, 0, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, 0, f },
+        { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
+        { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
+    };
+
+    for (int y = 0; y < 6; y++)
+    {
+        for (int x = 0; x < TILES_X; x++)
+        {
+            gbSetTileMapTile(gbGetWindow(0), x, y, testWinOne[y][x]);
+        }
+    }
+
     if (!gbRun())
         return 1;
 
@@ -160,6 +188,7 @@ int main(int argc, char *argv[])
 
     glDeleteTextures(1, &e);
     glDeleteTextures(1, &f);
+    free(testWinTiles);
 
     return 0;
 }
