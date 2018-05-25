@@ -20,6 +20,9 @@ int gActiveBackground;
 GBTileMap gWindows[WIN_COUNT];
 int gActiveWindow;
 
+GBSprite *gActiveSprites[SPRITE_COUNT];
+int gActiveSpriteCount;
+
 void (*gRenderCallback)();
 
 bool setupPaletteShader()
@@ -278,6 +281,56 @@ bool gbSetActiveWindow(int index)
         return false;
 
     gActiveWindow = index;
+    return true;
+}
+
+bool gbAddSprite(GBSprite *sprite)
+{
+    if (gActiveSpriteCount >= SPRITE_COUNT)
+    {
+        printf("Cannot add sprite, already at %i sprites.\n", SPRITE_COUNT);
+        return false;
+    }
+
+    gActiveSprites[gActiveSpriteCount] = sprite;
+    gActiveSpriteCount++;
+
+    return true;
+}
+
+bool removeInactiveSpriteError()
+{
+    printf("Cannot remove a sprite that is not active.\n");
+    return false;
+}
+
+bool gbRemoveSprite(GBSprite *sprite)
+{
+    // dont bother with anything if there arent any active sprites
+    if (gActiveSpriteCount >= SPRITE_COUNT)
+        return removeInactiveSpriteError();
+
+    // find the sprite
+    int spriteIndex = -1;
+
+    for (int i = 0; i < SPRITE_COUNT; i++)
+    {
+        if (gActiveSprites[i] == sprite)
+        {
+            spriteIndex = i;
+            break;
+        }
+    }
+
+    // if the sprite wasnt active, return an error
+    if (spriteIndex == -1)
+        return removeInactiveSpriteError();
+
+    // shift back the elements to remove the sprite
+    for (int i = spriteIndex; i < SPRITE_COUNT - 1; i++)
+        gActiveSprites[i] = gActiveSprites[i + 1];
+
+    gActiveSpriteCount--;
     return true;
 }
 

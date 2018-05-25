@@ -13,6 +13,23 @@ typedef struct
     int *tiles;
 } GBTileMap;
 
+typedef enum
+{
+    GBSpritePriorityAbove = 0, //on top of the window and background
+    GBSpritePriorityBelow = 1, //hidden behind the window and background
+} GBSpritePriority;
+
+typedef struct
+{
+    int x;
+    int y;
+    int tile;
+    int palette; //index of the sprite palette to use
+    bool flipX;
+    bool flipY;
+    GBSpritePriority priority;
+} GBSprite;
+
 void gbSetTileMapTile(GBTileMap *map, int x, int y, int tile);
 
 bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsizei height, GLuint pixels[]);

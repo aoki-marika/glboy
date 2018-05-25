@@ -26,3 +26,5 @@
 #define TILE_DATA_COUNT 1
 #define TILE_DATA_TILE_COUNT 256
 #define TILE_DATA_BG 0
+
+#define SPRITE_COUNT 40

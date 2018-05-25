@@ -217,10 +217,31 @@ int main(int argc, char *argv[])
         }
     }
 
+    // test sprites
+    GBSprite testSpriteOne = {
+        .x = 10,
+        .y = 10,
+        .tile = e,
+    };
+
+    GBSprite testSpriteTwo = {
+        .x = 30,
+        .y = 10,
+        .tile = f,
+    };
+
+    if (!gbAddSprite(&testSpriteOne) ||
+        !gbAddSprite(&testSpriteTwo))
+        return 1;
+
     if (!gbRun())
         return 1;
 
     if (!gbQuit())
+        return 1;
+
+    if (!gbRemoveSprite(&testSpriteOne) ||
+        !gbRemoveSprite(&testSpriteTwo))
         return 1;
 
     free(testWinOneTiles);

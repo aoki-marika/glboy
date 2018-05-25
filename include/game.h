@@ -22,5 +22,8 @@ bool gbSetActiveBackground(int index);
 GBTileMap *gbGetWindow(int index);
 bool gbSetActiveWindow(int index);
 
+bool gbAddSprite(GBSprite *sprite);
+bool gbRemoveSprite(GBSprite *sprite);
+
 bool gbRun();
 bool gbQuit();
