@@ -14,9 +14,9 @@ bool gRunning = false;
 SDL_Window *gWindow;
 SDL_GLContext gContext;
 
+GLfloat gColours[PAL_LENGTH][3];
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
 GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramType;
-GLfloat gColours[PAL_LENGTH][3];
 int gBackgroundPalette[PAL_LENGTH];
 int gSpritePalettes[SPRITE_PAL_COUNT][PAL_LENGTH];
 
@@ -47,7 +47,7 @@ bool setupPaletteShader()
          }"
     };
 
-    //todo: shader cleanup
+    //todo: window colour 0 below sprites
     const GLchar *fragmentSource[] =
     {
         "uniform sampler2D texture; \
