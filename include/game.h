@@ -14,15 +14,13 @@ void gbSetRenderCallback(void (*callback)());
 void gbSetColours(SDL_Color colours[PAL_COUNT]); //screen colours
 void gbSetPalette(int palette[PAL_COUNT]); //map palette index to colour index
 
-// todo: i -> index
+bool gbSetTileData(int type, int index, GLuint data[]);
 
-bool gbSetTileData(int type, int i, GLuint data[]);
+GBTileMap *gbGetBackground(int index);
+bool gbSetActiveBackground(int index);
 
-GBTileMap *gbGetBackground(int i);
-bool gbSetActiveBackground(int i);
-
-GBTileMap *gbGetWindow(int i);
-bool gbSetActiveWindow(int i);
+GBTileMap *gbGetWindow(int index);
+bool gbSetActiveWindow(int index);
 
 bool gbRun();
 bool gbQuit();

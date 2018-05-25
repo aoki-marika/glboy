@@ -202,7 +202,7 @@ void gbSetPalette(int palette[PAL_COUNT])
         gPalette[i] = palette[i];
 }
 
-bool gbSetTileData(int type, int i, GLuint data[])
+bool gbSetTileData(int type, int index, GLuint data[])
 {
     if (type >= TILE_DATA_COUNT)
     {
@@ -210,13 +210,13 @@ bool gbSetTileData(int type, int i, GLuint data[])
         return false;
     }
 
-    if (i >= TILE_DATA_TILE_COUNT)
+    if (index >= TILE_DATA_TILE_COUNT)
     {
-        printf("Tile data index %i is out of range (%i).\n", i, TILE_DATA_TILE_COUNT);
+        printf("Tile data index %i is out of range (%i).\n", index, TILE_DATA_TILE_COUNT);
         return false;
     }
 
-    GLuint *tile = &gTileData[type][i];
+    GLuint *tile = &gTileData[type][index];
 
     // delete the existing texture (if there is one) and create the new one
     glDeleteTextures(1, tile);
@@ -225,59 +225,59 @@ bool gbSetTileData(int type, int i, GLuint data[])
     return true;
 }
 
-bool verifyBgIndex(int i)
+bool verifyBgIndex(int index)
 {
-    if (i >= BG_COUNT)
+    if (index >= BG_COUNT)
     {
-        printf("Background %i is out of range (%i)", i, BG_COUNT);
+        printf("Background %i is out of range (%i)", index, BG_COUNT);
         return false;
     }
 
     return true;
 }
 
-GBTileMap *gbGetBackground(int i)
+GBTileMap *gbGetBackground(int index)
 {
-    if (!verifyBgIndex(i))
+    if (!verifyBgIndex(index))
         return NULL;
 
-    return &gBackgrounds[i];
+    return &gBackgrounds[index];
 }
 
-bool gbSetActiveBackground(int i)
+bool gbSetActiveBackground(int index)
 {
-    if (!verifyBgIndex(i))
+    if (!verifyBgIndex(index))
         return false;
 
-    gActiveBackground = i;
+    gActiveBackground = index;
     return true;
 }
 
-bool verifyWinIndex(int i)
+bool verifyWinIndex(int index)
 {
-    if (i >= WIN_COUNT)
+    if (index >= WIN_COUNT)
     {
-        printf("Window %i is out of range (%i)", i, WIN_COUNT);
+        printf("Window %i is out of range (%i)", index, WIN_COUNT);
         return false;
     }
 
     return true;
 }
 
-GBTileMap *gbGetWindow(int i)
+GBTileMap *gbGetWindow(int index)
 {
-    if (!verifyWinIndex(i))
+    if (!verifyWinIndex(index))
         return NULL;
 
-    return &gWindows[i];
+    return &gWindows[index];
 }
 
-bool gbSetActiveWindow(int i)
+bool gbSetActiveWindow(int index)
 {
-    if (!verifyWinIndex(i))
+    if (!verifyWinIndex(index))
         return false;
 
-    gActiveWindow = i;
+    gActiveWindow = index;
     return true;
 }
 
