@@ -1,6 +1,13 @@
 #include "game.h"
 #include "utils.h"
 
+typedef enum
+{
+    GBShaderTypeBg = 0,
+    GBShaderTypeWin = 1,
+    GBShaderTypeSprite = 2,
+} GBShaderType;
+
 bool gInitialized = false;
 bool gRunning = false;
 
@@ -8,7 +15,7 @@ SDL_Window *gWindow;
 SDL_GLContext gContext;
 
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
-GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramTransparency, gPaletteProgramIsBg;
+GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramType;
 GLfloat gColours[PAL_LENGTH][3];
 int gBackgroundPalette[PAL_LENGTH];
 int gSpritePalettes[SPRITE_PAL_COUNT][PAL_LENGTH];
@@ -46,23 +53,23 @@ bool setupPaletteShader()
         "uniform sampler2D texture; \
          uniform vec3 colours[4]; \
          uniform int palette[4]; \
-         uniform bool transparency; \
-         uniform bool isBg; \
+         uniform int type; \
+         uniform int typeBg, typeWin, typeSprite; \
          \
          void main() \
          { \
-             vec4 texel = texture2D(texture, gl_TexCoord[0].xy); \
-             int i = int((texel.r * 255.0) + 0.5); \
-             vec3 p = colours[palette[i]]; \
+             vec4 t = texture2D(texture, gl_TexCoord[0].xy); \
+             int i = int((t.r * 255.0) + 0.5); \
+             vec3 c = colours[palette[i]]; \
              \
-             float a = texel.a; \
-             if (transparency && i == 0) \
+             float a = t.a; \
+             if (type == typeSprite && i == 0) \
                 a = 0.0; \
              \
-             gl_FragColor = vec4(p.r, p.g, p.b, a); \
+             gl_FragColor = vec4(c.r, c.g, c.b, a); \
              \
-             if (isBg && i == 0) \
-                gl_FragDepth =  1.0; \
+             if (type == typeBg && i == 0) \
+                gl_FragDepth = 1.0; \
              else \
                 gl_FragDepth = gl_FragCoord.z; \
          }"
@@ -88,8 +95,12 @@ bool setupPaletteShader()
     // get all the uniforms
     gPaletteProgramColours = glGetUniformLocation(gPaletteProgram, "colours");
     gPaletteProgramPalette = glGetUniformLocation(gPaletteProgram, "palette");
-    gPaletteProgramTransparency = glGetUniformLocation(gPaletteProgram, "transparency");
-    gPaletteProgramIsBg = glGetUniformLocation(gPaletteProgram, "isBg");
+    gPaletteProgramType = glGetUniformLocation(gPaletteProgram, "type");
+
+    // set the type values
+    glUniform1i(glGetUniformLocation(gPaletteProgram, "typeBg"), GBShaderTypeBg);
+    glUniform1i(glGetUniformLocation(gPaletteProgram, "typeWin"), GBShaderTypeWin);
+    glUniform1i(glGetUniformLocation(gPaletteProgram, "typeSprite"), GBShaderTypeSprite);
 
     // say the setup was successful
     return true;
@@ -490,14 +501,9 @@ void setShaderPalette(int palette[PAL_LENGTH])
     glUniform1iv(gPaletteProgramPalette, PAL_LENGTH, palette);
 }
 
-void setShaderTransparency(bool transparency)
+void setShaderType(int type)
 {
-    glUniform1i(gPaletteProgramTransparency, transparency ? GL_TRUE : GL_FALSE);
-}
-
-void setShaderIsBg(bool isBg)
-{
-    glUniform1i(gPaletteProgramIsBg, isBg ? GL_TRUE : GL_FALSE);
+    glUniform1i(gPaletteProgramType, type);
 }
 
 //todo: verify values from structs
@@ -507,20 +513,20 @@ void render()
     // clear the colour and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // set the palette and isBg flag for the BG/window
+    // set the palette for the BG and window
     setShaderPalette(gBackgroundPalette);
-    setShaderIsBg(true);
 
-    // render the active background and window
+    // render the active background
+    setShaderType(GBShaderTypeBg);
     renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
+
+    // render the active window
+    setShaderType(GBShaderTypeWin);
     renderTileMap(gbGetWindow(gActiveWindow), TILE_DATA_BG, false);
 
-    // set the transparency and isBg flags for sprites
-    setShaderTransparency(true);
-    setShaderIsBg(false);
-
-    // render sprites
+    // render the active sprites
     int currentSpritePalette = -1;
+    setShaderType(GBShaderTypeSprite);
 
     for (int i = 0; i < gActiveSpriteCount; i++)
     {
@@ -550,9 +556,8 @@ void render()
         renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY);
     }
 
-    // reset the shader flags
-    setShaderTransparency(false);
-    setShaderIsBg(true);
+    // reset the shader type
+    setShaderType(GBShaderTypeBg);
 
     if (gRenderCallback)
         gRenderCallback();

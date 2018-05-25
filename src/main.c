@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
     };
 
     GBSprite testSpriteTwo = {
-        .x = 30,
+        .x = 35,
         .y = 10,
         .tile = d,
         .palette = 1,
