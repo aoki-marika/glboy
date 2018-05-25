@@ -31,7 +31,7 @@ int gActiveWindow;
 GBSprite *gActiveSprites[SPRITE_COUNT];
 int gActiveSpriteCount;
 
-void (*gRenderCallback)();
+void (*gRenderCallback)(), (*gUpdateCallback)();
 
 bool setupPaletteShader()
 {
@@ -194,6 +194,11 @@ bool gbInit()
 
     gInitialized = true;
     return true;
+}
+
+void gbSetUpdateCallback(void (*callback)())
+{
+    gUpdateCallback = callback;
 }
 
 void gbSetRenderCallback(void (*callback)())
@@ -393,6 +398,9 @@ void update()
                 break;
         }
     }
+
+    if (gUpdateCallback)
+        gUpdateCallback();
 }
 
 int wrapIndex(int index, int length)

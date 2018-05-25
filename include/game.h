@@ -9,6 +9,7 @@
 
 bool gbInit();
 
+void gbSetUpdateCallback(void (*callback)());
 void gbSetRenderCallback(void (*callback)());
 
 void gbSetColours(SDL_Color colours[PAL_LENGTH]); //screen colours

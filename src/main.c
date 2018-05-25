@@ -7,7 +7,7 @@
 
 int gActive;
 
-void renderMain()
+void updateMain()
 {
     if (gActive == 0)
     {
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     gbSetBackgroundPalette(palette);
     gbSetSpritePalette(0, spritePaletteOne);
     gbSetSpritePalette(1, spritePaletteTwo);
-    gbSetRenderCallback(renderMain);
+    gbSetUpdateCallback(updateMain);
 
     // test backgrounds
 
