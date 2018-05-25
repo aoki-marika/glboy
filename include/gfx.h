@@ -16,7 +16,7 @@ typedef struct
 typedef enum
 {
     GBSpritePriorityAbove = 0, //on top of the window and background
-    GBSpritePriorityBelow = 1, //hidden behind the window and background
+    GBSpritePriorityBelow = 1, //hidden behind colours 1-3 of the window and background (not 0)
 } GBSpritePriority;
 
 typedef struct

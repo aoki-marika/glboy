@@ -271,6 +271,7 @@ int main(int argc, char *argv[])
         .palette = 1,
         .flipX = true,
         .flipY = true,
+        .priority = GBSpritePriorityBelow,
     };
 
     if (!gbAddSprite(&testSpriteOne) ||

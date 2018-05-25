@@ -8,7 +8,7 @@ SDL_Window *gWindow;
 SDL_GLContext gContext;
 
 GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
-GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramTransparency;
+GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramTransparency, gPaletteProgramIsBg;
 GLfloat gColours[PAL_LENGTH][3];
 int gBackgroundPalette[PAL_LENGTH];
 int gSpritePalettes[SPRITE_PAL_COUNT][PAL_LENGTH];
@@ -40,12 +40,14 @@ bool setupPaletteShader()
          }"
     };
 
+    //todo: shader cleanup
     const GLchar *fragmentSource[] =
     {
         "uniform sampler2D texture; \
          uniform vec3 colours[4]; \
          uniform int palette[4]; \
          uniform bool transparency; \
+         uniform bool isBg; \
          \
          void main() \
          { \
@@ -58,6 +60,11 @@ bool setupPaletteShader()
                 a = 0.0; \
              \
              gl_FragColor = vec4(p.r, p.g, p.b, a); \
+             \
+             if (isBg && i == 0) \
+                gl_FragDepth =  1.0; \
+             else \
+                gl_FragDepth = gl_FragCoord.z; \
          }"
     };
 
@@ -82,6 +89,7 @@ bool setupPaletteShader()
     gPaletteProgramColours = glGetUniformLocation(gPaletteProgram, "colours");
     gPaletteProgramPalette = glGetUniformLocation(gPaletteProgram, "palette");
     gPaletteProgramTransparency = glGetUniformLocation(gPaletteProgram, "transparency");
+    gPaletteProgramIsBg = glGetUniformLocation(gPaletteProgram, "isBg");
 
     // say the setup was successful
     return true;
@@ -155,7 +163,10 @@ bool gbInit()
 
     // setup the scene
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+
+    glDepthFunc(GL_LEQUAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // setup the palette shadewr
@@ -405,7 +416,7 @@ float translateForFlip(bool flip, int pos, int size)
     return flip ? -pos * 2 - size : 0.0f;
 }
 
-void renderTile(int dataType, int dataIndex, int x, int y, bool flipX, bool flipY)
+void renderTile(int dataType, int dataIndex, int x, int y, float z, bool flipX, bool flipY)
 {
     glBindTexture(GL_TEXTURE_2D, gTileData[dataType][dataIndex]);
 
@@ -421,10 +432,10 @@ void renderTile(int dataType, int dataIndex, int x, int y, bool flipX, bool flip
     }
 
     glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(x, y);
-        glTexCoord2f(1.0f, 0.0f); glVertex2f(x + TILE_WIDTH, y);
-        glTexCoord2f(1.0f, 1.0f); glVertex2f(x + TILE_WIDTH, y + TILE_HEIGHT);
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(x, y + TILE_HEIGHT);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(x, y, z);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(x + TILE_WIDTH, y, z);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(x + TILE_WIDTH, y + TILE_HEIGHT, z);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(x, y + TILE_HEIGHT, z);
     glEnd();
 
     if (flipX || flipY)
@@ -453,7 +464,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = startDrawX + (x * TILE_WIDTH);
                 int dy = startDrawY + (y * TILE_HEIGHT);
 
-                renderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy, false, false);
+                renderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy, Z_BG, false, false);
             }
         }
     }
@@ -468,7 +479,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = map->x + (x * TILE_WIDTH);
                 int dy = map->y + (y * TILE_HEIGHT);
 
-                renderTile(dataType, map->tiles[x + (y * map->width)], dx, dy, false, false);
+                renderTile(dataType, map->tiles[x + (y * map->width)], dx, dy, Z_BG, false, false);
             }
         }
     }
@@ -479,22 +490,34 @@ void setShaderPalette(int palette[PAL_LENGTH])
     glUniform1iv(gPaletteProgramPalette, PAL_LENGTH, palette);
 }
 
+void setShaderTransparency(bool transparency)
+{
+    glUniform1i(gPaletteProgramTransparency, transparency ? GL_TRUE : GL_FALSE);
+}
+
+void setShaderIsBg(bool isBg)
+{
+    glUniform1i(gPaletteProgramIsBg, isBg ? GL_TRUE : GL_FALSE);
+}
+
 //todo: verify values from structs
 
 void render()
 {
-    // clear the colour buffer
-    glClear(GL_COLOR_BUFFER_BIT);
+    // clear the colour and depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // set the BG palette
+    // set the palette and isBg flag for the BG/window
     setShaderPalette(gBackgroundPalette);
+    setShaderIsBg(true);
 
     // render the active background and window
     renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
     renderTileMap(gbGetWindow(gActiveWindow), TILE_DATA_BG, false);
 
-    // set the transparency flag for sprites
-    glUniform1i(gPaletteProgramTransparency, GL_TRUE);
+    // set the transparency and isBg flags for sprites
+    setShaderTransparency(true);
+    setShaderIsBg(false);
 
     // render sprites
     int currentSpritePalette = -1;
@@ -510,12 +533,26 @@ void render()
             setShaderPalette(gSpritePalettes[currentSpritePalette]);
         }
 
+        float z;
+        switch (s->priority)
+        {
+            case GBSpritePriorityAbove:
+                z = Z_ABOVE;
+                break;
+            case GBSpritePriorityBelow:
+                z = Z_BELOW;
+                break;
+            default:
+                break;
+        }
+
         // render the sprite
-        renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, s->flipX, s->flipY);
+        renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY);
     }
 
-    // reset the transparency flag
-    glUniform1i(gPaletteProgramTransparency, GL_FALSE);
+    // reset the shader flags
+    setShaderTransparency(false);
+    setShaderIsBg(true);
 
     if (gRenderCallback)
         gRenderCallback();
