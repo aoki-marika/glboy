@@ -5,23 +5,29 @@
 #include "gfx.h"
 #include "gfx_constants.h"
 
-int gBg;
+int gActive;
 
 void renderMain()
 {
-    if (gBg == 0)
+    if (gActive == 0)
     {
         gbGetBackground(0)->x += 1;
         gbGetBackground(0)->y -= 1;
+
+        gbGetWindow(0)->y -= 1;
     }
-    if (gBg == 1)
+    if (gActive == 1)
     {
         gbGetBackground(1)->x -= 1;
         gbGetBackground(1)->y += 1;
+
+        gbGetWindow(1)->x += 1;
+        gbGetWindow(1)->y += 1;
     }
 
-    gbSetActiveBackground(gBg);
-    gBg = !gBg;
+    gbSetActiveBackground(gActive);
+    gbSetActiveWindow(gActive);
+    gActive = !gActive;
 }
 
 int main(int argc, char *argv[])
@@ -73,7 +79,9 @@ int main(int argc, char *argv[])
     gbSetPalette(palette);
     gbSetRenderCallback(renderMain);
 
-    GLuint testOne[BG_HEIGHT][BG_WIDTH] = {
+    // test backgrounds
+
+    GLuint testBgOne[BG_HEIGHT][BG_WIDTH] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, f, 0, 0, f, 0, f, f, f, f, 0, f, 0, 0, 0, 0, f, 0, 0, 0, 0, 0, f, f, 0, 0, 0, f, 0, 0, f },
@@ -108,7 +116,7 @@ int main(int argc, char *argv[])
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
     };
 
-    GLuint testTwo[BG_HEIGHT][BG_WIDTH] = {
+    GLuint testBgTwo[BG_HEIGHT][BG_WIDTH] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, f },
         { f, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f, 0, f },
@@ -147,23 +155,24 @@ int main(int argc, char *argv[])
     {
         for (int x = 0; x < BG_WIDTH; x++)
         {
-            gbSetTileMapTile(gbGetBackground(0), x, y, testOne[y][x]);
-            gbSetTileMapTile(gbGetBackground(1), x, y, testTwo[y][x]);
+            gbSetTileMapTile(gbGetBackground(0), x, y, testBgOne[y][x]);
+            gbSetTileMapTile(gbGetBackground(1), x, y, testBgTwo[y][x]);
         }
     }
 
-    // gbGetWindow(0)->y = (TILES_Y - 6) * TILE_HEIGHT;
+    // test window one
 
-    gbGetWindow(0)->x = ((TILES_Y / 2) * TILE_HEIGHT) - TILE_WIDTH / 2;
-    gbGetWindow(0)->y = (-3 * TILE_HEIGHT) - TILE_HEIGHT / 2;
+    const int testWinOneWidth = TILES_X;
+    const int testWinOneHeight = 6;
 
-    gbGetWindow(0)->width = TILES_X;
-    gbGetWindow(0)->height = 6;
+    gbGetWindow(0)->y = (TILES_Y - testWinOneHeight) * TILE_HEIGHT;
+    gbGetWindow(0)->width = testWinOneWidth;
+    gbGetWindow(0)->height = testWinOneHeight;
 
-    GLuint *testWinTiles = (GLuint *)calloc(TILES_X * 6, sizeof(GLuint));
-    gbGetWindow(0)->tiles = testWinTiles;
+    GLuint *testWinOneTiles = (GLuint *)calloc(testWinOneWidth * testWinOneHeight, sizeof(GLuint));
+    gbGetWindow(0)->tiles = testWinOneTiles;
 
-    GLuint testWinOne[6][TILES_X] = {
+    GLuint testWinOne[testWinOneHeight][testWinOneWidth] = {
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
         { f, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f },
         { f, 0, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, 0, f },
@@ -172,11 +181,38 @@ int main(int argc, char *argv[])
         { f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f },
     };
 
-    for (int y = 0; y < 6; y++)
+    for (int y = 0; y < testWinOneHeight; y++)
     {
-        for (int x = 0; x < TILES_X; x++)
+        for (int x = 0; x < testWinOneWidth; x++)
         {
             gbSetTileMapTile(gbGetWindow(0), x, y, testWinOne[y][x]);
+        }
+    }
+
+    // test window two
+
+    const int testWinTwoWidth = 5;
+    const int testWinTwoHeight = 5;
+
+    gbGetWindow(1)->width = testWinTwoWidth;
+    gbGetWindow(1)->height = testWinTwoHeight;
+
+    GLuint *testWinTwoTiles = (GLuint *)calloc(testWinTwoWidth * testWinTwoHeight, sizeof(GLuint));
+    gbGetWindow(1)->tiles = testWinTwoTiles;
+
+    GLuint testWinTwo[testWinTwoHeight][testWinTwoWidth] = {
+        { f, f, f, f, f },
+        { f, 0, 0, 0, f },
+        { f, 0, e, 0, f },
+        { f, 0, 0, 0, f },
+        { f, f, f, f, f },
+    };
+
+    for (int y = 0; y < testWinTwoHeight; y++)
+    {
+        for (int x = 0; x < testWinTwoWidth; x++)
+        {
+            gbSetTileMapTile(gbGetWindow(1), x, y, testWinTwo[y][x]);
         }
     }
 
@@ -188,7 +224,9 @@ int main(int argc, char *argv[])
 
     glDeleteTextures(1, &e);
     glDeleteTextures(1, &f);
-    free(testWinTiles);
+
+    free(testWinOneTiles);
+    free(testWinTwoTiles);
 
     return 0;
 }
