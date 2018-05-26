@@ -14,11 +14,13 @@ endif
 BINDIR = bin
 SRC = $(wildcard *.c)
 
-all: $(SRC:.c=)
+all: libglboy $(BINDIR) $(SRC:.c=)
 
-.c: | $(BINDIR)
-	# todo: fixme
-	$(MKDIR_P) $(BINDIR)
+.PHONY: libglboy
+libglboy:
+	$(MAKE) -C ../
+
+.c:
 	$(CC) $^ -o $(BINDIR)/$@ $(CFLAGS) $(LDFLAGS) $(LDLIBS)
 
 $(BINDIR)/:
