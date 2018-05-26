@@ -1,13 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Iinclude
-LDLIBS = -lSDL2
 MKDIR_P = mkdir -p
-
-ifeq ($(shell uname -s), Darwin)
-	LDLIBS += -framework OpenGL
-else
-	LDLIBS += -lGL
-endif
+RM = rm
 
 SRCDIR = src
 BINDIR = bin
@@ -31,4 +25,4 @@ $(OBJDIR)/:
 	$(MKDIR_P) $@
 
 clean:
-	rm $(OBJ) $(OUTPUT)
+	$(RM) $(OBJ) $(OUTPUT)
