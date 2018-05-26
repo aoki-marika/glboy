@@ -1,5 +1,6 @@
 #include "game.h"
 #include "utils.h"
+#include "input_constants.h"
 
 typedef enum
 {
@@ -204,6 +205,24 @@ void gbSetUpdateCallback(void (*callback)())
 void gbSetRenderCallback(void (*callback)())
 {
     gRenderCallback = callback;
+}
+
+GBInputState gbGetInputState()
+{
+    const Uint8 *s = SDL_GetKeyboardState(NULL);
+
+    GBInputState state = {
+        .up = s[SCANCODE_UP],
+        .down = s[SCANCODE_DOWN],
+        .left = s[SCANCODE_LEFT],
+        .right = s[SCANCODE_RIGHT],
+        .a = s[SCANCODE_A],
+        .b = s[SCANCODE_B],
+        .start = s[SCANCODE_START],
+        .select = s[SCANCODE_SELECT],
+    };
+
+    return state;
 }
 
 void gbSetColours(SDL_Color colours[PAL_LENGTH])

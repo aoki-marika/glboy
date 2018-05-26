@@ -7,10 +7,17 @@
 #include "gfx.h"
 #include "gfx_constants.h"
 
+typedef struct
+{
+    bool up, down, left, right;
+    bool a, b, start, select;
+} GBInputState;
+
 bool gbInit();
 
 void gbSetUpdateCallback(void (*callback)());
 void gbSetRenderCallback(void (*callback)());
+GBInputState gbGetInputState();
 
 void gbSetColours(SDL_Color colours[PAL_LENGTH]); //screen colours
 
