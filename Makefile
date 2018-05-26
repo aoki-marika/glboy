@@ -29,3 +29,6 @@ $(BINDIR)/:
 
 $(OBJDIR)/:
 	$(MKDIR_P) $@
+
+clean:
+	rm $(OBJ) $(OUTPUT)
