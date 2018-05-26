@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Iinclude
+CFLAGS = -Wall -Iinclude/glboy
 MKDIR_P = mkdir -p
 RM = rm
 
