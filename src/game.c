@@ -462,6 +462,8 @@ void renderTile(int dataType, int dataIndex, int x, int y, float z, bool flipX, 
         glPopMatrix();
 }
 
+// todo: stutter when moving around 0,0
+
 void renderTileMap(GBTileMap *map, int dataType, bool wrap)
 {
     if (wrap)
