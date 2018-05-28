@@ -69,7 +69,7 @@ bool setupPaletteShader()
              \
              gl_FragColor = vec4(c.r, c.g, c.b, a); \
              \
-             if (type == typeBg && i == 0) \
+             if ((type == typeBg || type == typeSprite) && i == 0) \
                 gl_FragDepth = 1.0; \
              else \
                 gl_FragDepth = gl_FragCoord.z; \
@@ -244,7 +244,7 @@ bool gbSetSpritePalette(int index, int palette[PAL_LENGTH])
 {
     if (index >= SPRITE_PAL_COUNT)
     {
-        printf("Sprite palette index %i is out of range (%i).", index, SPRITE_PAL_COUNT);
+        printf("Sprite palette index %i is out of range (%i).\n", index, SPRITE_PAL_COUNT);
         return false;
     }
 
@@ -282,7 +282,7 @@ bool verifyBgIndex(int index)
 {
     if (index >= BG_COUNT)
     {
-        printf("Background %i is out of range (%i)", index, BG_COUNT);
+        printf("Background %i is out of range (%i).\n", index, BG_COUNT);
         return false;
     }
 
@@ -310,7 +310,7 @@ bool verifyWinIndex(int index)
 {
     if (index >= WIN_COUNT)
     {
-        printf("Window %i is out of range (%i)", index, WIN_COUNT);
+        printf("Window %i is out of range (%i).\n", index, WIN_COUNT);
         return false;
     }
 
