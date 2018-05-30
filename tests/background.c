@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
 
     int e = 1, f = 2;
 
-    gbLoadImage(empty, emptyPixels);
-    gbLoadImage(filled, filledPixels);
+    gbParseTile(empty, emptyPixels);
+    gbParseTile(filled, filledPixels);
 
     if (!gbSetTileData(TILE_DATA_BG, e, emptyPixels) ||
         !gbSetTileData(TILE_DATA_BG, f, filledPixels))

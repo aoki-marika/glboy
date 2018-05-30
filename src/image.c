@@ -1,7 +1,7 @@
 #include "image.h"
 #include "gfx_constants.h"
 
-void gbLoadImage(unsigned char bytes[], GLuint pixels[])
+void gbParseTile(unsigned char bytes[], GLuint pixels[])
 {
     for (int y = 0; y < TILE_HEIGHT; y++)
     {

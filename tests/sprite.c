@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
 
     int b = 1, l = 2;
 
-    gbLoadImage(ball, ballPixels);
-    gbLoadImage(lines, linesPixels);
+    gbParseTile(ball, ballPixels);
+    gbParseTile(lines, linesPixels);
 
     if (!gbSetTileData(TILE_DATA_SPRITE, b, ballPixels) ||
         !gbSetTileData(TILE_DATA_SPRITE, l, linesPixels) ||

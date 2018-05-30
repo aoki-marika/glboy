@@ -82,15 +82,15 @@ int main(int argc, char *argv[])
     GLuint rightPixels[TILE_SIZE];
     GLuint textPixels[TILE_SIZE];
 
-    gbLoadImage(topLeft, topLeftPixels);
-    gbLoadImage(topRight, topRightPixels);
-    gbLoadImage(bottomLeft, bottomLeftPixels);
-    gbLoadImage(bottomRight, bottomRightPixels);
-    gbLoadImage(top, topPixels);
-    gbLoadImage(bottom, bottomPixels);
-    gbLoadImage(left, leftPixels);
-    gbLoadImage(right, rightPixels);
-    gbLoadImage(text, textPixels);
+    gbParseTile(topLeft, topLeftPixels);
+    gbParseTile(topRight, topRightPixels);
+    gbParseTile(bottomLeft, bottomLeftPixels);
+    gbParseTile(bottomRight, bottomRightPixels);
+    gbParseTile(top, topPixels);
+    gbParseTile(bottom, bottomPixels);
+    gbParseTile(left, leftPixels);
+    gbParseTile(right, rightPixels);
+    gbParseTile(text, textPixels);
 
     int tl = 1, tr = 2, bl = 3, br = 4, t = 5, b = 6, l = 7, r = 8, x = 9;
 
