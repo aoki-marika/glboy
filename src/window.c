@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "window.h"
+#include "palette.h"
 #include "gfx_constants.h"
 
 GBTileMap gWindows[WIN_COUNT];
@@ -37,4 +38,12 @@ bool gbSetActiveWindow(int index)
 
     gActiveWindow = index;
     return true;
+}
+
+bool gbRenderWindow()
+{
+    gbSetActivePalette(GBPaletteTypeBackground, 0);
+    gbSetPaletteMode(GBPaletteModeWindow);
+
+    return gbRenderTileMap(gbGetActiveWindow(), TILE_DATA_BG, false);
 }

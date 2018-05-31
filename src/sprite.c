@@ -64,7 +64,7 @@ bool gbRemoveSprite(GBSprite *sprite)
     return true;
 }
 
-void gbRenderSprites()
+bool gbRenderSprites()
 {
     int currentPalete = -1;
     gbSetPaletteMode(GBPaletteModeSprite);
@@ -77,7 +77,9 @@ void gbRenderSprites()
         if (s->palette != currentPalete)
         {
             currentPalete = s->palette;
-            gbSetActivePalette(GBPaletteTypeSprite, currentPalete);
+
+            if (!gbSetActivePalette(GBPaletteTypeSprite, currentPalete))
+                return false;
         }
 
         float z;
@@ -89,11 +91,12 @@ void gbRenderSprites()
             case GBSpritePriorityBelow:
                 z = Z_BELOW;
                 break;
-            default:
-                break;
         }
 
         // render the sprite
-        gbRenderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY);
+        if (!gbRenderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY))
+            return false;
     }
+
+    return true;
 }

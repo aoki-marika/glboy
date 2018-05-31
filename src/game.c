@@ -4,7 +4,6 @@
 #include "window.h"
 #include "tile.h"
 #include "sprite.h"
-#include "input_constants.h"
 
 bool gInitialized = false;
 bool gRunning = false;
@@ -120,18 +119,9 @@ void render()
     // clear the colour and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // set the palette for the BG and window
-    gbSetActivePalette(GBPaletteTypeBackground, 0);
-
-    // render the active background
-    gbSetPaletteMode(GBPaletteModeBackground);
-    gbRenderTileMap(gbGetActiveBackground(), TILE_DATA_BG, true);
-
-    // render the active window
-    gbSetPaletteMode(GBPaletteModeWindow);
-    gbRenderTileMap(gbGetActiveWindow(), TILE_DATA_BG, false);
-
-    // render the active sprites
+    // render all the layers
+    gbRenderBackground();
+    gbRenderWindow();
     gbRenderSprites();
 
     // reset the palette mode

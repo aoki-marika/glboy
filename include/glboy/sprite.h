@@ -24,4 +24,4 @@ bool gbSpriteQuit();
 bool gbAddSprite(GBSprite *sprite);
 bool gbRemoveSprite(GBSprite *sprite);
 
-void gbRenderSprites();
+bool gbRenderSprites();

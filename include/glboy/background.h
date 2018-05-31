@@ -8,3 +8,5 @@ bool gbBackgroundQuit();
 GBTileMap *gbGetBackground(int index);
 GBTileMap *gbGetActiveBackground();
 bool gbSetActiveBackground(int index);
+
+bool gbRenderBackground();

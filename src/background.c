@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "background.h"
+#include "palette.h"
 #include "gfx_constants.h"
 
 GBTileMap gBackgrounds[BG_COUNT];
@@ -60,4 +61,12 @@ bool gbSetActiveBackground(int index)
 
     gActiveBackground = index;
     return true;
+}
+
+bool gbRenderBackground()
+{
+    gbSetActivePalette(GBPaletteTypeBackground, 0);
+    gbSetPaletteMode(GBPaletteModeBackground);
+
+    return gbRenderTileMap(gbGetActiveBackground(), TILE_DATA_BG, true);
 }
