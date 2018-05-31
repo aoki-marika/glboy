@@ -4,7 +4,7 @@
 
 #include "gl.h"
 #include "sdl.h"
-#include "gfx.h"
+#include "gfx_utils.h"
 #include "gfx_constants.h"
 
 bool gbInit();

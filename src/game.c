@@ -280,7 +280,7 @@ bool gbSetTileData(int type, int index, GLuint data[TILE_SIZE])
 
     // delete the existing texture (if there is one) and create the new one
     glDeleteTextures(1, tile);
-    gbCreateImageTexture(tile, data);
+    gbCreateTileTexture(tile, data);
 
     return true;
 }

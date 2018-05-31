@@ -59,7 +59,7 @@ bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsiz
     return true;
 }
 
-bool gbCreateImageTexture(GLuint *texture, GLuint pixels[])
+bool gbCreateTileTexture(GLuint *texture, GLuint pixels[])
 {
     return gbCreateTexture(texture, GL_LUMINANCE, TILE_WIDTH, TILE_HEIGHT, pixels);
 }
