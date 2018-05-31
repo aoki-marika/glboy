@@ -12,9 +12,6 @@ bool gbInit();
 void gbSetUpdateCallback(void (*callback)());
 void gbSetRenderCallback(void (*callback)());
 
-bool gbSetTileData(int type, int index, GLuint data[TILE_SIZE]);
-bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * TILE_SIZE]);
-
 bool gbAddSprite(GBSprite *sprite);
 bool gbRemoveSprite(GBSprite *sprite);
 

@@ -4,6 +4,7 @@
 #include <glboy/palette.h>
 #include <glboy/background.h>
 #include <glboy/window.h>
+#include <glboy/tile.h>
 #include <glboy/gfx_utils.h>
 
 int gActiveWin;
