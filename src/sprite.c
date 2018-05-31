@@ -3,6 +3,8 @@
 #include "tile.h"
 #include "gfx_constants.h"
 
+GBSpriteMode gSpriteMode;
+
 GBSprite *gActiveSprites[SPRITE_COUNT];
 int gActiveSpriteCount;
 
@@ -12,6 +14,11 @@ bool gbSpriteQuit()
         gbRemoveSprite(gActiveSprites[i]);
 
     return true;
+}
+
+void gbSetSpriteMode(GBSpriteMode mode)
+{
+    gSpriteMode = mode;
 }
 
 bool gbAddSprite(GBSprite *sprite)
@@ -64,6 +71,16 @@ bool gbRemoveSprite(GBSprite *sprite)
     return true;
 }
 
+bool verifyTileIndex(int index)
+{
+    int count = TILE_DATA_TILE_COUNT;
+
+    if (gSpriteMode == GBSpriteMode8x16)
+        count /= 2;
+
+    return index < count;
+}
+
 bool gbRenderSprites()
 {
     int currentPalete = -1;
@@ -93,9 +110,17 @@ bool gbRenderSprites()
                 break;
         }
 
+        if (!verifyTileIndex(s->tile))
+            return false;
+
         // render the sprite
         if (!gbRenderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY))
             return false;
+
+        // render the second tile if we are in 8x16 sprite mode
+        if (gSpriteMode == GBSpriteMode8x16)
+            if (!gbRenderTile(TILE_DATA_SPRITE, s->tile + 1, s->x, s->y + TILE_HEIGHT, z, s->flipX, s->flipY))
+                return false;
     }
 
     return true;

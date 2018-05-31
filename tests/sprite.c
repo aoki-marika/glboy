@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
     gbSetBackgroundPalette(palette);
     gbSetSpritePalette(0, spritePaletteOne);
     gbSetSpritePalette(1, spritePaletteTwo);
+    gbSetSpriteMode(GBSpriteMode8x8);
     gbSetUpdateCallback(updateMain);
 
     // setup background and window for priority testing

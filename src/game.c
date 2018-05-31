@@ -6,6 +6,7 @@
 #include "background.h"
 #include "window.h"
 #include "sprite.h"
+#include "gfx_utils.h"
 
 bool gInitialized = false;
 bool gRunning = false;
