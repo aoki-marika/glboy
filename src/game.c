@@ -612,12 +612,19 @@ bool gbRun()
         return false;
     }
 
-    // todo: frame limiting
+    Uint32 frameStart;
     gRunning = true;
+
     while (gRunning)
     {
+        frameStart = SDL_GetTicks();
+
         update();
         render();
+
+        Uint32 frameDuration = SDL_GetTicks() - frameStart;
+        if (frameDuration < SCREEN_FRAME_MS)
+            SDL_Delay(SCREEN_FRAME_MS - frameDuration);
     }
 
     return true;
