@@ -433,11 +433,10 @@ void update()
 
 int wrapIndex(int index, int length)
 {
-    int i = index;
-    if (i < 0)
-        i += length * (-i / length + 1);
-
-    return i % length;
+    if (index > 0)
+        return index % length;
+    else
+        return (index % length + length) % length;
 }
 
 int calculateMapDrawPosition(int pos, int tileSize)
@@ -450,7 +449,12 @@ int calculateMapDrawPosition(int pos, int tileSize)
 
 int calculateMapStartTile(int pos, int tileSize, int mapSize)
 {
-    return wrapIndex(-pos / tileSize, mapSize);
+    float p = -pos / tileSize;
+
+    if (pos > 0)
+        p -= 1;
+
+    return wrapIndex(p, mapSize);
 }
 
 float scaleForFlip(bool flip)
@@ -488,8 +492,6 @@ void renderTile(int dataType, int dataIndex, int x, int y, float z, bool flipX, 
     if (flipX || flipY)
         glPopMatrix();
 }
-
-// todo: stutter when moving around 0,0
 
 void renderTileMap(GBTileMap *map, int dataType, bool wrap)
 {
