@@ -36,6 +36,21 @@ int main(int argc, char *argv[])
     if (!gbInit())
         return 1;
 
+    const int tileCount = 2;
+    unsigned char tiles[tileCount * TILE_BYTES] = {
+        0x20, 0x1C, 0x70, 0x0E, 0xB0, 0x4F, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0xFF, 0x02, 0x7E, 0x04, 0x3C,
+        0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38,
+    };
+
+    GLuint pixels[tileCount * TILE_SIZE];
+    gbParseImage(tileCount, tiles, pixels);
+
+    if (!gbSetTileDataMultiple(TILE_DATA_SPRITE, 1, tileCount, pixels) ||
+        !gbSetTileDataMultiple(TILE_DATA_BG, 1, tileCount, pixels))
+        return 1;
+
+    int b = 1, l = 2;
+
     SDL_Color colours[PAL_LENGTH] = {
         { 222, 248, 210 },
         { 130, 192, 117 },
@@ -69,28 +84,6 @@ int main(int argc, char *argv[])
     gbSetSpritePalette(0, spritePaletteOne);
     gbSetSpritePalette(1, spritePaletteTwo);
     gbSetUpdateCallback(updateMain);
-
-    unsigned char ball[] = {
-        0x20, 0x1C, 0x70, 0x0E, 0xB0, 0x4F, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0xFF, 0x02, 0x7E, 0x04, 0x3C
-    };
-
-    unsigned char lines[] = {
-        0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38
-    };
-
-    GLuint ballPixels[TILE_SIZE];
-    GLuint linesPixels[TILE_SIZE];
-
-    int b = 1, l = 2;
-
-    gbParseTile(ball, ballPixels);
-    gbParseTile(lines, linesPixels);
-
-    if (!gbSetTileData(TILE_DATA_SPRITE, b, ballPixels) ||
-        !gbSetTileData(TILE_DATA_SPRITE, l, linesPixels) ||
-        !gbSetTileData(TILE_DATA_BG, b, ballPixels) ||
-        !gbSetTileData(TILE_DATA_BG, l, linesPixels))
-        return 1;
 
     // setup background and window for priority testing
     for (int i = 0; i < BG_SIZE / 4; i++)
