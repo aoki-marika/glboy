@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "image.h"
 
 void gbParseTile(unsigned char bytes[TILE_BYTES], GLuint pixels[TILE_SIZE])
@@ -19,6 +17,7 @@ void gbParseTile(unsigned char bytes[TILE_BYTES], GLuint pixels[TILE_SIZE])
 
 void gbParseImage(int tileCount, unsigned char bytes[tileCount * TILE_BYTES], GLuint pixels[tileCount * TILE_SIZE])
 {
+    // iterate through every TILE_BYTES bytes in bytes and load the tile data within
     for (int i = 0; i < tileCount; i++)
     {
         unsigned char b[TILE_BYTES];

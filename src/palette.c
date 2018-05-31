@@ -12,10 +12,8 @@ int gSpritePalettes[SPRITE_PAL_COUNT][PAL_LENGTH];
 
 bool gbPaletteInit()
 {
-    // create the palette program
     gPaletteProgram = glCreateProgram();
 
-    // create the vertex and fragment shaders
     const GLchar *vertexSource[] =
     {
         " \
@@ -57,18 +55,14 @@ bool gbPaletteInit()
     gbCreateShader(&gPaletteVertexShader, GL_VERTEX_SHADER, vertexSource);
     gbCreateShader(&gPaletteFragmentShader, GL_FRAGMENT_SHADER, fragmentSource);
 
-    // attach the shaders
     glAttachShader(gPaletteProgram, gPaletteVertexShader);
     glAttachShader(gPaletteProgram, gPaletteFragmentShader);
 
-    // link the program
     glLinkProgram(gPaletteProgram);
 
-    // check for program errors
     if (gbProgramError(gPaletteProgram, GL_LINK_STATUS, "linking program"))
         return false;
 
-    // use the palette program
     glUseProgram(gPaletteProgram);
 
     // get all the uniforms
@@ -86,7 +80,6 @@ bool gbPaletteInit()
 
 bool gbPaletteQuit()
 {
-    // delete the palette shaders and program
     glDeleteShader(gPaletteVertexShader);
     glDeleteShader(gPaletteFragmentShader);
     glDeleteProgram(gPaletteProgram);
@@ -109,7 +102,6 @@ void gbSetColours(SDL_Color colours[PAL_LENGTH])
             gColours[i][c] = newColours[i][c];
     }
 
-    // set the shader colours
     glUniform3fv(gPaletteProgramColours, PAL_LENGTH, (const GLfloat *)newColours);
 
     // update the clear colour

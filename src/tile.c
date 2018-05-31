@@ -80,7 +80,7 @@ bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * T
     if (!verifyType(type))
         return false;
 
-    // iterate through every TILE_SIZE pixels in data and load the tile data within
+    // iterate through every TILE_SIZE pixels in data and set the corresponding tile data to the tile within
     for (int i = 0; i < count; i++)
     {
         GLuint d[TILE_SIZE];

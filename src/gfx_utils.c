@@ -41,13 +41,11 @@ bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsiz
     glBindTexture(GL_TEXTURE_2D, *texture);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-    // set the wrap/repeat modes
+    // set min/mag and wrap defaults
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    // set the min/mag filters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     // unbind the texture so geometry isnt autmatically drawn with this texture
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -80,19 +78,13 @@ bool gbCreateShader(GLuint *shader, GLenum type, const GLchar *source[])
 
 void gbPrintProgramLog(GLuint program)
 {
-    // make sure program is actually a program
     if (glIsProgram(program))
     {
         int infoLogLength = 0;
         int maxLength = infoLogLength;
-
-        // get the length of the info log
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
 
-        // allocate the info log
         char infoLog[maxLength];
-
-        // get and print the log
         glGetProgramInfoLog(program, maxLength, &infoLogLength, infoLog);
 
         if (infoLogLength > 0)
@@ -104,19 +96,13 @@ void gbPrintProgramLog(GLuint program)
 
 void gbPrintShaderLog(GLuint shader)
 {
-    // make sure shader is actually a shader
     if (glIsShader(shader))
     {
         int infoLogLength = 0;
         int maxLength = infoLogLength;
-
-        // get the length of the info log
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-        // allocate the info log
         char infoLog[maxLength];
-
-        // get and print the log
         glGetShaderInfoLog(shader, maxLength, &infoLogLength, infoLog);
 
         if (infoLogLength > 0)
@@ -128,7 +114,6 @@ void gbPrintShaderLog(GLuint shader)
 
 bool gbProgramError(GLuint program, GLenum pname, const char *message)
 {
-    // check for program errors
     GLint check = GL_FALSE;
     glGetProgramiv(program, pname, &check);
 
@@ -144,7 +129,6 @@ bool gbProgramError(GLuint program, GLenum pname, const char *message)
 
 bool gbShaderError(GLuint shader, GLenum pname, const char *message)
 {
-    // check for shader errors
     GLint check = GL_FALSE;
     glGetShaderiv(shader, pname, &check);
 

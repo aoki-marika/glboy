@@ -73,7 +73,7 @@ bool gbRenderSprites()
     {
         GBSprite *s = gActiveSprites[i];
 
-        // apply the palette
+        // set the active palette
         if (s->palette != currentPalete)
         {
             currentPalete = s->palette;
