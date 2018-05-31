@@ -612,6 +612,7 @@ bool gbRun()
         return false;
     }
 
+    // todo: frame limiting
     gRunning = true;
     while (gRunning)
     {
