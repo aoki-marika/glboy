@@ -133,10 +133,6 @@ int main(int argc, char *argv[])
     if (!gbQuit())
         return 1;
 
-    for (int i = 0; i < test_sprite_count; i++)
-        if (!gbRemoveSprite(&gSprites[i]))
-            return 1;
-
     free(winTiles);
 
     return 0;

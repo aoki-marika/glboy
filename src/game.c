@@ -664,7 +664,9 @@ bool gbQuit()
         free(gTileData[i]);
     }
 
-    //todo: free all active sprites?
+    // free all the active sprites
+    for (int i = 0; i < gActiveSpriteCount; i++)
+        gbRemoveSprite(gActiveSprites[i]);
 
     // reset the initialized state
     gInitialized = false;

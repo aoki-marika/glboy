@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I ../include #todo: glboy/*.h
+CFLAGS = -I ../include
 LDFLAGS = -L ../bin
 LDLIBS = -lglboy -lSDL2
 MKDIR_P = mkdir -p
