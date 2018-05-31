@@ -113,75 +113,6 @@ void update()
         gUpdateCallback();
 }
 
-int wrapIndex(int index, int length)
-{
-    if (index > 0)
-        return index % length;
-    else
-        return (index % length + length) % length;
-}
-
-int calculateMapDrawPosition(int pos, int tileSize)
-{
-    if (pos > 0)
-        return wrapIndex(pos, tileSize) - tileSize;
-    else
-        return wrapIndex(pos, -tileSize);
-}
-
-int calculateMapStartTile(int pos, int tileSize, int mapSize)
-{
-    float p = -pos / tileSize;
-
-    if (pos > 0)
-        p -= 1;
-
-    return wrapIndex(p, mapSize);
-}
-
-void renderTileMap(GBTileMap *map, int dataType, bool wrap)
-{
-    if (wrap)
-    {
-        int startDrawX = calculateMapDrawPosition(map->x, TILE_WIDTH);
-        int startDrawY = calculateMapDrawPosition(map->y, TILE_HEIGHT);
-
-        int startTileX = calculateMapStartTile(map->x, TILE_WIDTH, map->width);
-        int startTileY = calculateMapStartTile(map->y, TILE_HEIGHT, map->height);
-
-        // add 1 to TILES_X/Y so that there is always one tile offscreen for smooth scrolling
-
-        for (int y = 0; y < TILES_Y + 1; y++)
-        {
-            for (int x = 0; x < TILES_X + 1; x++)
-            {
-                int tx = wrapIndex(startTileX + x, map->width);
-                int ty = wrapIndex(startTileY + y, map->height);
-
-                int dx = startDrawX + (x * TILE_WIDTH);
-                int dy = startDrawY + (y * TILE_HEIGHT);
-
-                gbRenderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy, Z_BG, false, false);
-            }
-        }
-    }
-    else
-    {
-        // non-wrapped maps are typically only onscreen, so dont bother clipping
-
-        for (int y = 0; y < map->height; y++)
-        {
-            for (int x = 0; x < map->width; x++)
-            {
-                int dx = map->x + (x * TILE_WIDTH);
-                int dy = map->y + (y * TILE_HEIGHT);
-
-                gbRenderTile(dataType, map->tiles[x + (y * map->width)], dx, dy, Z_BG, false, false);
-            }
-        }
-    }
-}
-
 // todo: more errors/safety in render
 
 void render()
@@ -194,11 +125,11 @@ void render()
 
     // render the active background
     gbSetPaletteMode(GBPaletteModeBackground);
-    renderTileMap(gbGetActiveBackground(), TILE_DATA_BG, true);
+    gbRenderTileMap(gbGetActiveBackground(), TILE_DATA_BG, true);
 
     // render the active window
     gbSetPaletteMode(GBPaletteModeWindow);
-    renderTileMap(gbGetActiveWindow(), TILE_DATA_BG, false);
+    gbRenderTileMap(gbGetActiveWindow(), TILE_DATA_BG, false);
 
     // render the active sprites
     gbRenderSprites();
