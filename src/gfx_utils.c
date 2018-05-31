@@ -1,8 +1,33 @@
 #include <stdio.h>
 
-#include "gfx.h"
+#include "sdl.h"
+#include "gfx_utils.h"
 #include "gfx_constants.h"
-#include "utils.h"
+
+bool gbGlError(const char *message)
+{
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR)
+    {
+        printf("Error %s! %u\n", message, error);
+        return true;
+    }
+
+    return false;
+}
+
+bool gbSdlError(const char *message)
+{
+    const char *error = SDL_GetError();
+    if (*error)
+    {
+        printf("Error %s! %s\n", message, error);
+        SDL_ClearError();
+        return true;
+    }
+
+    return false;
+}
 
 void gbSetTileMapTile(GBTileMap *map, int x, int y, int tile)
 {

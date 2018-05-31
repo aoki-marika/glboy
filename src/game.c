@@ -1,5 +1,4 @@
 #include "game.h"
-#include "utils.h"
 #include "input_constants.h"
 
 typedef enum
@@ -546,7 +545,7 @@ void setShaderType(int type)
     glUniform1i(gPaletteProgramType, type);
 }
 
-//todo: verify values from structs
+// todo: more errors/safety in render
 
 void render()
 {

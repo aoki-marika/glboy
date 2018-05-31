@@ -1,6 +1,7 @@
 #include <glboy/game.h>
 #include <glboy/image.h>
 #include <glboy/input.h>
+#include <glboy/gfx_utils.h>
 
 int gActiveWin;
 
