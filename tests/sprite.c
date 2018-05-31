@@ -3,6 +3,7 @@
 #include <glboy/input.h>
 #include <glboy/palette.h>
 #include <glboy/background.h>
+#include <glboy/window.h>
 
 const int test_sprite_count = 2;
 

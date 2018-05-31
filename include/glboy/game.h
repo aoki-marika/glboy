@@ -15,9 +15,6 @@ void gbSetRenderCallback(void (*callback)());
 bool gbSetTileData(int type, int index, GLuint data[TILE_SIZE]);
 bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * TILE_SIZE]);
 
-GBTileMap *gbGetWindow(int index);
-bool gbSetActiveWindow(int index);
-
 bool gbAddSprite(GBSprite *sprite);
 bool gbRemoveSprite(GBSprite *sprite);
 

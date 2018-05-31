@@ -1,6 +1,7 @@
 #include "game.h"
 #include "palette.h"
 #include "background.h"
+#include "window.h"
 #include "input_constants.h"
 
 bool gInitialized = false;
@@ -10,9 +11,6 @@ SDL_Window *gWindow;
 SDL_GLContext gContext;
 
 GLuint *gTileData[TILE_DATA_COUNT];
-
-GBTileMap gWindows[WIN_COUNT];
-int gActiveWindow;
 
 GBSprite *gActiveSprites[SPRITE_COUNT];
 int gActiveSpriteCount;
@@ -156,34 +154,6 @@ bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * T
             return false;
     }
 
-    return true;
-}
-
-bool verifyWinIndex(int index)
-{
-    if (index >= WIN_COUNT)
-    {
-        printf("Window %i is out of range (%i).\n", index, WIN_COUNT);
-        return false;
-    }
-
-    return true;
-}
-
-GBTileMap *gbGetWindow(int index)
-{
-    if (!verifyWinIndex(index))
-        return NULL;
-
-    return &gWindows[index];
-}
-
-bool gbSetActiveWindow(int index)
-{
-    if (!verifyWinIndex(index))
-        return false;
-
-    gActiveWindow = index;
     return true;
 }
 
@@ -378,7 +348,7 @@ void render()
 
     // render the active window
     gbSetPaletteMode(GBPaletteModeWindow);
-    renderTileMap(gbGetWindow(gActiveWindow), TILE_DATA_BG, false);
+    renderTileMap(gbGetActiveWindow(), TILE_DATA_BG, false);
 
     // render the active sprites
     int currentSpritePalette = -1;
