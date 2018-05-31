@@ -5,6 +5,15 @@
 #include "gl.h"
 #include "gfx_constants.h"
 
+typedef struct
+{
+    int width;
+    int height;
+    int x;
+    int y;
+    int *tiles;
+} GBTileMap;
+
 bool gbTileInit();
 bool gbTileQuit();
 

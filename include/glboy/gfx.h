@@ -2,15 +2,6 @@
 
 #include <stdbool.h>
 
-typedef struct
-{
-    int width;
-    int height;
-    int x;
-    int y;
-    int *tiles;
-} GBTileMap;
-
 typedef enum
 {
     GBSpritePriorityAbove = 0, //on top of the window and background

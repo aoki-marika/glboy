@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gfx.h"
+#include "tile.h"
 
 bool gbBackgroundInit();
 bool gbBackgroundQuit();
