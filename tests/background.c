@@ -2,8 +2,9 @@
 #include <glboy/game.h>
 #include <glboy/image.h>
 #include <glboy/input.h>
-#include <glboy/gfx_utils.h>
 #include <glboy/palette.h>
+#include <glboy/background.h>
+#include <glboy/gfx_utils.h>
 
 int gActiveBg;
 

@@ -2,6 +2,7 @@
 #include <glboy/image.h>
 #include <glboy/input.h>
 #include <glboy/palette.h>
+#include <glboy/background.h>
 
 void defaultColours()
 {

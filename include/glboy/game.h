@@ -15,9 +15,6 @@ void gbSetRenderCallback(void (*callback)());
 bool gbSetTileData(int type, int index, GLuint data[TILE_SIZE]);
 bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * TILE_SIZE]);
 
-GBTileMap *gbGetBackground(int index);
-bool gbSetActiveBackground(int index);
-
 GBTileMap *gbGetWindow(int index);
 bool gbSetActiveWindow(int index);
 

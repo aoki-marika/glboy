@@ -1,5 +1,6 @@
 #include "game.h"
 #include "palette.h"
+#include "background.h"
 #include "input_constants.h"
 
 bool gInitialized = false;
@@ -9,9 +10,6 @@ SDL_Window *gWindow;
 SDL_GLContext gContext;
 
 GLuint *gTileData[TILE_DATA_COUNT];
-
-GBTileMap gBackgrounds[BG_COUNT];
-int gActiveBackground;
 
 GBTileMap gWindows[WIN_COUNT];
 int gActiveWindow;
@@ -25,18 +23,6 @@ void setupTileData()
 {
     for (int i = 0; i < TILE_DATA_COUNT; i++)
         gTileData[i] = (GLuint *)calloc(TILE_DATA_TILE_COUNT, sizeof(GLuint));
-}
-
-void setupBackgrounds()
-{
-    for (int i = 0; i < BG_COUNT; i++)
-    {
-        int *tiles = (int *)calloc(BG_SIZE, sizeof(int));
-
-        gBackgrounds[i].width = BG_WIDTH;
-        gBackgrounds[i].height = BG_HEIGHT;
-        gBackgrounds[i].tiles = tiles;
-    }
 }
 
 bool gbInit()
@@ -99,9 +85,11 @@ bool gbInit()
     if (!gbPaletteInit())
         return false;
 
-    // setup the tile data and maps
+    // setup the tile data
     setupTileData();
-    setupBackgrounds();
+
+    if (!gbBackgroundInit())
+        return false;
 
     // check for any OpenGL errors from intializing
     if (gbGlError("initializing OpenGL"))
@@ -168,34 +156,6 @@ bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * T
             return false;
     }
 
-    return true;
-}
-
-bool verifyBgIndex(int index)
-{
-    if (index >= BG_COUNT)
-    {
-        printf("Background %i is out of range (%i).\n", index, BG_COUNT);
-        return false;
-    }
-
-    return true;
-}
-
-GBTileMap *gbGetBackground(int index)
-{
-    if (!verifyBgIndex(index))
-        return NULL;
-
-    return &gBackgrounds[index];
-}
-
-bool gbSetActiveBackground(int index)
-{
-    if (!verifyBgIndex(index))
-        return false;
-
-    gActiveBackground = index;
     return true;
 }
 
@@ -414,7 +374,7 @@ void render()
 
     // render the active background
     gbSetPaletteMode(GBPaletteModeBackground);
-    renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
+    renderTileMap(gbGetActiveBackground(), TILE_DATA_BG, true);
 
     // render the active window
     gbSetPaletteMode(GBPaletteModeWindow);
@@ -507,9 +467,8 @@ bool gbQuit()
     SDL_GL_DeleteContext(gContext);
     SDL_Quit();
 
-    // free all the tile maps
-    for (int i = 0; i < BG_COUNT; i++)
-        free(gBackgrounds[i].tiles);
+    if (!gbBackgroundQuit())
+        return false;
 
     // free all the tile data
     for (int i = 0; i < TILE_DATA_COUNT; i++)
