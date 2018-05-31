@@ -255,13 +255,21 @@ bool gbSetSpritePalette(int index, int palette[PAL_LENGTH])
     return true;
 }
 
-bool gbSetTileData(int type, int index, GLuint data[])
+bool verifyTypeIndex(int type)
 {
     if (type >= TILE_DATA_COUNT)
     {
         printf("Tile data type %i is out of range (%i).\n", type, TILE_DATA_COUNT);
         return false;
     }
+
+    return true;
+}
+
+bool gbSetTileData(int type, int index, GLuint data[TILE_SIZE])
+{
+    if (!verifyTypeIndex(type))
+        return false;
 
     if (index >= TILE_DATA_TILE_COUNT)
     {
@@ -274,6 +282,25 @@ bool gbSetTileData(int type, int index, GLuint data[])
     // delete the existing texture (if there is one) and create the new one
     glDeleteTextures(1, tile);
     gbCreateImageTexture(tile, data);
+
+    return true;
+}
+
+bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * TILE_SIZE])
+{
+    if (!verifyTypeIndex(type))
+        return false;
+
+    for (int i = 0; i < count; i++)
+    {
+        GLuint d[TILE_SIZE];
+
+        for (int di = 0; di < TILE_SIZE; di++)
+            d[di] = data[(i * TILE_SIZE) + di];
+
+        if (!gbSetTileData(type, index + i, d))
+            return false;
+    }
 
     return true;
 }
