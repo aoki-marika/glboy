@@ -12,12 +12,6 @@ bool gbInit();
 void gbSetUpdateCallback(void (*callback)());
 void gbSetRenderCallback(void (*callback)());
 
-void gbSetColours(SDL_Color colours[PAL_LENGTH]); //screen colours
-
-// map palette index to colour index
-void gbSetBackgroundPalette(int palette[PAL_LENGTH]); //background and window
-bool gbSetSpritePalette(int index, int palette[PAL_LENGTH]);
-
 bool gbSetTileData(int type, int index, GLuint data[TILE_SIZE]);
 bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * TILE_SIZE]);
 

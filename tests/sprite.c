@@ -1,6 +1,7 @@
 #include <glboy/game.h>
 #include <glboy/image.h>
 #include <glboy/input.h>
+#include <glboy/palette.h>
 
 const int test_sprite_count = 2;
 

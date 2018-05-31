@@ -1,24 +1,12 @@
 #include "game.h"
+#include "palette.h"
 #include "input_constants.h"
-
-typedef enum
-{
-    GBShaderTypeBg = 0,
-    GBShaderTypeWin = 1,
-    GBShaderTypeSprite = 2,
-} GBShaderType;
 
 bool gInitialized = false;
 bool gRunning = false;
 
 SDL_Window *gWindow;
 SDL_GLContext gContext;
-
-GLfloat gColours[PAL_LENGTH][3];
-GLuint gPaletteProgram, gPaletteVertexShader, gPaletteFragmentShader;
-GLint gPaletteProgramColours, gPaletteProgramPalette, gPaletteProgramType;
-int gBackgroundPalette[PAL_LENGTH];
-int gSpritePalettes[SPRITE_PAL_COUNT][PAL_LENGTH];
 
 GLuint *gTileData[TILE_DATA_COUNT];
 
@@ -32,79 +20,6 @@ GBSprite *gActiveSprites[SPRITE_COUNT];
 int gActiveSpriteCount;
 
 void (*gRenderCallback)(), (*gUpdateCallback)();
-
-bool setupPaletteShader()
-{
-    // create the palette program
-    gPaletteProgram = glCreateProgram();
-
-    // create the vertex and fragment shaders
-    const GLchar *vertexSource[] =
-    {
-        "void main() { \
-             gl_Position = ftransform(); \
-             gl_TexCoord[0] = gl_MultiTexCoord0; \
-         }"
-    };
-
-    //todo: window colour 0 below sprites
-    const GLchar *fragmentSource[] =
-    {
-        "uniform sampler2D texture; \
-         uniform vec3 colours[4]; \
-         uniform int palette[4]; \
-         uniform int type; \
-         uniform int typeBg, typeWin, typeSprite; \
-         \
-         void main() \
-         { \
-             vec4 t = texture2D(texture, gl_TexCoord[0].xy); \
-             int i = int((t.r * 255.0) + 0.5); \
-             vec3 c = colours[palette[i]]; \
-             \
-             float a = t.a; \
-             if (type == typeSprite && i == 0) \
-                a = 0.0; \
-             \
-             gl_FragColor = vec4(c.r, c.g, c.b, a); \
-             \
-             if ((type == typeBg || type == typeSprite) && i == 0) \
-                gl_FragDepth = 1.0; \
-             else \
-                gl_FragDepth = gl_FragCoord.z; \
-         }"
-    };
-
-    gbCreateShader(&gPaletteVertexShader, GL_VERTEX_SHADER, vertexSource);
-    gbCreateShader(&gPaletteFragmentShader, GL_FRAGMENT_SHADER, fragmentSource);
-
-    // attach the shaders
-    glAttachShader(gPaletteProgram, gPaletteVertexShader);
-    glAttachShader(gPaletteProgram, gPaletteFragmentShader);
-
-    // link the program
-    glLinkProgram(gPaletteProgram);
-
-    // check for program errors
-    if (gbProgramError(gPaletteProgram, GL_LINK_STATUS, "linking program"))
-        return false;
-
-    // use the palette program
-    glUseProgram(gPaletteProgram);
-
-    // get all the uniforms
-    gPaletteProgramColours = glGetUniformLocation(gPaletteProgram, "colours");
-    gPaletteProgramPalette = glGetUniformLocation(gPaletteProgram, "palette");
-    gPaletteProgramType = glGetUniformLocation(gPaletteProgram, "type");
-
-    // set the type values
-    glUniform1i(glGetUniformLocation(gPaletteProgram, "typeBg"), GBShaderTypeBg);
-    glUniform1i(glGetUniformLocation(gPaletteProgram, "typeWin"), GBShaderTypeWin);
-    glUniform1i(glGetUniformLocation(gPaletteProgram, "typeSprite"), GBShaderTypeSprite);
-
-    // say the setup was successful
-    return true;
-}
 
 void setupTileData()
 {
@@ -180,8 +95,8 @@ bool gbInit()
     glDepthFunc(GL_LEQUAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // setup the palette shadewr
-    if (!setupPaletteShader())
+    // setup the palette
+    if (!gbPaletteInit())
         return false;
 
     // setup the tile data and maps
@@ -204,54 +119,6 @@ void gbSetUpdateCallback(void (*callback)())
 void gbSetRenderCallback(void (*callback)())
 {
     gRenderCallback = callback;
-}
-
-void gbSetColours(SDL_Color colours[PAL_LENGTH])
-{
-    // convert colours to float vec4s for GLSL
-    GLfloat newColours[PAL_LENGTH][3];
-
-    for (int i = 0; i < PAL_LENGTH; i++)
-    {
-        newColours[i][0] = colours[i].r / 255.0f;
-        newColours[i][1] = colours[i].g / 255.0f;
-        newColours[i][2] = colours[i].b / 255.0f;
-
-        for (int c = 0; c < 3; c++)
-            gColours[i][c] = newColours[i][c];
-    }
-
-    // set the shader colours
-    glUniform3fv(gPaletteProgramColours, PAL_LENGTH, (const GLfloat *)newColours);
-
-    // update the clear colour
-    gbSetBackgroundPalette(gBackgroundPalette);
-}
-
-void gbSetBackgroundPalette(int palette[PAL_LENGTH])
-{
-    // update the palette
-    for (int i = 0; i < PAL_LENGTH; i++)
-        gBackgroundPalette[i] = palette[i];
-
-    // update the clear colour
-    int c = palette[PAL_WHITE];
-    glClearColor(gColours[c][0], gColours[c][1], gColours[c][2], 1);
-}
-
-bool gbSetSpritePalette(int index, int palette[PAL_LENGTH])
-{
-    if (index >= SPRITE_PAL_COUNT)
-    {
-        printf("Sprite palette index %i is out of range (%i).\n", index, SPRITE_PAL_COUNT);
-        return false;
-    }
-
-    // update the palette
-    for (int i = 0; i < PAL_LENGTH; i++)
-        gSpritePalettes[index][i] = palette[i];
-
-    return true;
 }
 
 bool verifyTypeIndex(int type)
@@ -535,16 +402,6 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
     }
 }
 
-void setShaderPalette(int palette[PAL_LENGTH])
-{
-    glUniform1iv(gPaletteProgramPalette, PAL_LENGTH, palette);
-}
-
-void setShaderType(int type)
-{
-    glUniform1i(gPaletteProgramType, type);
-}
-
 // todo: more errors/safety in render
 
 void render()
@@ -553,19 +410,19 @@ void render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // set the palette for the BG and window
-    setShaderPalette(gBackgroundPalette);
+    gbSetActivePalette(GBPaletteTypeBackground, 0);
 
     // render the active background
-    setShaderType(GBShaderTypeBg);
+    gbSetPaletteMode(GBPaletteModeBackground);
     renderTileMap(gbGetBackground(gActiveBackground), TILE_DATA_BG, true);
 
     // render the active window
-    setShaderType(GBShaderTypeWin);
+    gbSetPaletteMode(GBPaletteModeWindow);
     renderTileMap(gbGetWindow(gActiveWindow), TILE_DATA_BG, false);
 
     // render the active sprites
     int currentSpritePalette = -1;
-    setShaderType(GBShaderTypeSprite);
+    gbSetPaletteMode(GBPaletteModeSprite);
 
     for (int i = 0; i < gActiveSpriteCount; i++)
     {
@@ -575,7 +432,7 @@ void render()
         if (s->palette != currentSpritePalette)
         {
             currentSpritePalette = s->palette;
-            setShaderPalette(gSpritePalettes[currentSpritePalette]);
+            gbSetActivePalette(GBPaletteTypeSprite, currentSpritePalette);
         }
 
         float z;
@@ -595,8 +452,8 @@ void render()
         renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY);
     }
 
-    // reset the shader type
-    setShaderType(GBShaderTypeBg);
+    // reset the palette mode
+    gbSetPaletteMode(GBPaletteModeBackground);
 
     if (gRenderCallback)
         gRenderCallback();
@@ -642,10 +499,8 @@ bool gbQuit()
     // stop the program if its running
     gRunning = false;
 
-    // delete the palette shaders and program
-    glDeleteShader(gPaletteVertexShader);
-    glDeleteShader(gPaletteFragmentShader);
-    glDeleteProgram(gPaletteProgram);
+    if (!gbPaletteQuit())
+        return false;
 
     // quit SDL and OpenGL
     SDL_DestroyWindow(gWindow);
