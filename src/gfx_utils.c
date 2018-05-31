@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "sdl.h"
 #include "gfx_utils.h"
+#include "sdl.h"
 #include "gfx_constants.h"
 
 bool gbGlError(const char *message)

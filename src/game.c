@@ -3,6 +3,7 @@
 #include "background.h"
 #include "window.h"
 #include "tile.h"
+#include "sprite.h"
 #include "input_constants.h"
 
 bool gInitialized = false;
@@ -10,9 +11,6 @@ bool gRunning = false;
 
 SDL_Window *gWindow;
 SDL_GLContext gContext;
-
-GBSprite *gActiveSprites[SPRITE_COUNT];
-int gActiveSpriteCount;
 
 void (*gRenderCallback)(), (*gUpdateCallback)();
 
@@ -95,56 +93,6 @@ void gbSetRenderCallback(void (*callback)())
     gRenderCallback = callback;
 }
 
-bool gbAddSprite(GBSprite *sprite)
-{
-    if (gActiveSpriteCount >= SPRITE_COUNT)
-    {
-        printf("Cannot add sprite, already at %i sprites.\n", SPRITE_COUNT);
-        return false;
-    }
-
-    gActiveSprites[gActiveSpriteCount] = sprite;
-    gActiveSpriteCount++;
-
-    return true;
-}
-
-bool removeInactiveSpriteError()
-{
-    printf("Cannot remove a sprite that is not active.\n");
-    return false;
-}
-
-bool gbRemoveSprite(GBSprite *sprite)
-{
-    // dont bother with anything if there arent any active sprites
-    if (gActiveSpriteCount >= SPRITE_COUNT)
-        return removeInactiveSpriteError();
-
-    // find the sprite
-    int spriteIndex = -1;
-
-    for (int i = 0; i < SPRITE_COUNT; i++)
-    {
-        if (gActiveSprites[i] == sprite)
-        {
-            spriteIndex = i;
-            break;
-        }
-    }
-
-    // if the sprite wasnt active, return an error
-    if (spriteIndex == -1)
-        return removeInactiveSpriteError();
-
-    // shift back the elements to remove the sprite
-    for (int i = spriteIndex; i < SPRITE_COUNT - 1; i++)
-        gActiveSprites[i] = gActiveSprites[i + 1];
-
-    gActiveSpriteCount--;
-    return true;
-}
-
 void update()
 {
     SDL_Event event;
@@ -191,42 +139,6 @@ int calculateMapStartTile(int pos, int tileSize, int mapSize)
     return wrapIndex(p, mapSize);
 }
 
-float scaleForFlip(bool flip)
-{
-    return flip ? -1.0f : 1.0f;
-}
-
-float translateForFlip(bool flip, int pos, int size)
-{
-    return flip ? -pos * 2 - size : 0.0f;
-}
-
-void renderTile(int dataType, int dataIndex, int x, int y, float z, bool flipX, bool flipY)
-{
-    glBindTexture(GL_TEXTURE_2D, gbGetTileData(dataType, dataIndex));
-
-    if (flipX || flipY)
-    {
-        glPushMatrix();
-            glScalef(scaleForFlip(flipX),
-                     scaleForFlip(flipY),
-                     1.0f);
-            glTranslatef(translateForFlip(flipX, x, TILE_WIDTH),
-                         translateForFlip(flipY, y, TILE_HEIGHT),
-                         0.0f);
-    }
-
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(x, y, z);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(x + TILE_WIDTH, y, z);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(x + TILE_WIDTH, y + TILE_HEIGHT, z);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(x, y + TILE_HEIGHT, z);
-    glEnd();
-
-    if (flipX || flipY)
-        glPopMatrix();
-}
-
 void renderTileMap(GBTileMap *map, int dataType, bool wrap)
 {
     if (wrap)
@@ -249,7 +161,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = startDrawX + (x * TILE_WIDTH);
                 int dy = startDrawY + (y * TILE_HEIGHT);
 
-                renderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy, Z_BG, false, false);
+                gbRenderTile(dataType, map->tiles[tx + (ty * map->width)], dx, dy, Z_BG, false, false);
             }
         }
     }
@@ -264,7 +176,7 @@ void renderTileMap(GBTileMap *map, int dataType, bool wrap)
                 int dx = map->x + (x * TILE_WIDTH);
                 int dy = map->y + (y * TILE_HEIGHT);
 
-                renderTile(dataType, map->tiles[x + (y * map->width)], dx, dy, Z_BG, false, false);
+                gbRenderTile(dataType, map->tiles[x + (y * map->width)], dx, dy, Z_BG, false, false);
             }
         }
     }
@@ -289,36 +201,7 @@ void render()
     renderTileMap(gbGetActiveWindow(), TILE_DATA_BG, false);
 
     // render the active sprites
-    int currentSpritePalette = -1;
-    gbSetPaletteMode(GBPaletteModeSprite);
-
-    for (int i = 0; i < gActiveSpriteCount; i++)
-    {
-        GBSprite *s = gActiveSprites[i];
-
-        // apply the palette
-        if (s->palette != currentSpritePalette)
-        {
-            currentSpritePalette = s->palette;
-            gbSetActivePalette(GBPaletteTypeSprite, currentSpritePalette);
-        }
-
-        float z;
-        switch (s->priority)
-        {
-            case GBSpritePriorityAbove:
-                z = Z_ABOVE;
-                break;
-            case GBSpritePriorityBelow:
-                z = Z_BELOW;
-                break;
-            default:
-                break;
-        }
-
-        // render the sprite
-        renderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY);
-    }
+    gbRenderSprites();
 
     // reset the palette mode
     gbSetPaletteMode(GBPaletteModeBackground);
@@ -381,9 +264,8 @@ bool gbQuit()
     if (!gbTileQuit())
         return false;
 
-    // free all the active sprites
-    for (int i = 0; i < gActiveSpriteCount; i++)
-        gbRemoveSprite(gActiveSprites[i]);
+    if (!gbSpriteQuit())
+        return false;
 
     // reset the initialized state
     gInitialized = false;

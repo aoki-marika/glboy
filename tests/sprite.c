@@ -5,6 +5,7 @@
 #include <glboy/background.h>
 #include <glboy/window.h>
 #include <glboy/tile.h>
+#include <glboy/sprite.h>
 
 const int test_sprite_count = 2;
 

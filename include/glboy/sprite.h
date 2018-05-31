@@ -18,3 +18,10 @@ typedef struct
     bool flipY;
     GBSpritePriority priority;
 } GBSprite;
+
+bool gbSpriteQuit();
+
+bool gbAddSprite(GBSprite *sprite);
+bool gbRemoveSprite(GBSprite *sprite);
+
+void gbRenderSprites();

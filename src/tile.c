@@ -94,3 +94,43 @@ bool gbSetTileDataMultiple(int type, int index, int count, GLuint data[count * T
 
     return true;
 }
+
+float scaleForFlip(bool flip)
+{
+    return flip ? -1.0f : 1.0f;
+}
+
+float translateForFlip(bool flip, int pos, int size)
+{
+    return flip ? -pos * 2 - size : 0.0f;
+}
+
+bool gbRenderTile(int type, int index, int x, int y, float z, bool flipX, bool flipY)
+{
+    if (!verifyType(type))
+        return false;
+
+    if (!verifyDataIndex(index))
+        return false;
+
+    glBindTexture(GL_TEXTURE_2D, gTileData[type][index]);
+
+    if (flipX || flipY)
+    {
+        glPushMatrix();
+            glScalef(scaleForFlip(flipX), scaleForFlip(flipY), 1.0f);
+            glTranslatef(translateForFlip(flipX, x, TILE_WIDTH), translateForFlip(flipY, y, TILE_HEIGHT), 0.0f);
+    }
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(x, y, z);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(x + TILE_WIDTH, y, z);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(x + TILE_WIDTH, y + TILE_HEIGHT, z);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(x, y + TILE_HEIGHT, z);
+    glEnd();
+
+    if (flipX || flipY)
+        glPopMatrix();
+
+    return true;
+}

@@ -12,8 +12,5 @@ bool gbInit();
 void gbSetUpdateCallback(void (*callback)());
 void gbSetRenderCallback(void (*callback)());
 
-bool gbAddSprite(GBSprite *sprite);
-bool gbRemoveSprite(GBSprite *sprite);
-
 bool gbRun();
 bool gbQuit();

@@ -3,7 +3,6 @@
 #include <stdbool.h>
 
 #include "gl.h"
-#include "gfx.h"
 #include "tile.h"
 
 bool gbGlError(const char *message);
