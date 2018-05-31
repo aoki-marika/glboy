@@ -11,6 +11,7 @@ const int test_sprite_count = 2;
 
 GBSprite *gSprites;
 int gActiveSprite;
+GBSpriteMode gMode;
 
 void updateMain()
 {
@@ -18,6 +19,12 @@ void updateMain()
 
     if (state.a.pressed && !state.a.repeat)
         gActiveSprite = !gActiveSprite;
+
+    if (state.b.pressed && !state.b.repeat)
+    {
+        gMode = !gMode;
+        gbSetSpriteMode(gMode);
+    }
 
     int x = 0;
     int y = 0;
