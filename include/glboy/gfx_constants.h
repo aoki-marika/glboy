@@ -3,6 +3,7 @@
 #define TILE_WIDTH 8
 #define TILE_HEIGHT 8
 #define TILE_SIZE TILE_WIDTH * TILE_HEIGHT
+#define TILE_BYTES 16
 
 #define TILES_X 20
 #define TILES_Y 18
