@@ -34,6 +34,11 @@ void gbSetTileMapTile(GBTileMap *map, int x, int y, int tile)
     map->tiles[x + (y * map->width)] = tile;
 }
 
+void gbClearTileMap(GBTileMap *map)
+{
+    memset(map->tiles, 0, sizeof(int) * (map->width * map->height));
+}
+
 bool gbCreateTexture(GLuint *texture, GLint internalFormat, GLsizei width, GLsizei height, GLuint pixels[])
 {
     // generate the texture and set pixel data

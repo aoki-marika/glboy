@@ -19,6 +19,9 @@ void updateMain()
         gbSetActiveBackground(gActiveBg);
     }
 
+    if (state.select.pressed && !state.select.repeat)
+        gbClearTileMap(gbGetActiveBackground());
+
     int x = 0;
     int y = 0;
 
