@@ -48,20 +48,22 @@ int main(int argc, char *argv[])
     if (!gbInit())
         return 1;
 
-    const int tileCount = 2;
+    const int tileCount = 4;
     unsigned char tiles[tileCount * TILE_BYTES] = {
-        0x20, 0x1C, 0x70, 0x0E, 0xB0, 0x4F, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0xFF, 0x02, 0x7E, 0x04, 0x3C,
-        0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38, 0x55, 0x38,
+        0x20, 0x1C, 0x40, 0x3E, 0x80, 0x7F, 0x00, 0xFF, 0x00, 0xFF, 0x01, 0xFF, 0x02, 0x7E, 0x04, 0x3C,
+        0x00, 0x00, 0x00, 0xC3, 0x00, 0x7E, 0x18, 0x24, 0x18, 0x24, 0x18, 0x24, 0x18, 0x66, 0x00, 0xFF,
+        0x33, 0x0F, 0x33, 0x0F, 0x33, 0x0F, 0x33, 0x0F, 0x33, 0x0F, 0x33, 0x0F, 0x33, 0x0F, 0x33, 0x0F,
+        0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     };
 
     GLuint pixels[tileCount * TILE_SIZE];
     gbParseImage(tileCount, tiles, pixels);
 
-    if (!gbSetTileDataMultiple(TILE_DATA_SPRITE, 1, tileCount, pixels) ||
+    if (!gbSetTileDataMultiple(TILE_DATA_SPRITE, 0, tileCount, pixels) ||
         !gbSetTileDataMultiple(TILE_DATA_BG, 1, tileCount, pixels))
         return 1;
 
-    int b = 1, l = 2;
+    int ball = 0, gradient = 1;
 
     SDL_Color colours[PAL_LENGTH] = {
         { 222, 248, 210 },
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
 
     // setup background and window for priority testing
     for (int i = 0; i < BG_SIZE / 4; i++)
-        gbGetBackground(0)->tiles[i] = l;
+        gbGetBackground(0)->tiles[i] = 1 + (gradient * 2);
 
     const int winWidth = 5;
     const int winHeight = 5;
@@ -112,21 +114,21 @@ int main(int argc, char *argv[])
     gbGetWindow(0)->tiles = winTiles;
 
     for (int i = 0; i < winWidth * winHeight; i++)
-        gbGetWindow(0)->tiles[i] = b;
+        gbGetWindow(0)->tiles[i] = 1 + (ball * 2);
 
     // test sprites
     GBSprite sprites[] = {
         {
             .x = 10,
             .y = 10,
-            .tile = b,
+            .tile = ball,
             .palette = 0,
             .flipX = true,
         },
         {
             .x = 35,
             .y = 10,
-            .tile = l,
+            .tile = gradient,
             .palette = 1,
             .flipX = true,
             .flipY = true,

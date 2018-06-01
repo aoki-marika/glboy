@@ -110,16 +110,21 @@ bool gbRenderSprites()
                 break;
         }
 
+        int i = s->tile;
+
+        if (gSpriteMode == GBSpriteMode8x16)
+            i *= 2;
+
         if (!verifyTileIndex(s->tile))
             return false;
 
         // render the sprite
-        if (!gbRenderTile(TILE_DATA_SPRITE, s->tile, s->x, s->y, z, s->flipX, s->flipY))
+        if (!gbRenderTile(TILE_DATA_SPRITE, i, s->x, s->y, z, s->flipX, s->flipY))
             return false;
 
         // render the second tile if we are in 8x16 sprite mode
         if (gSpriteMode == GBSpriteMode8x16)
-            if (!gbRenderTile(TILE_DATA_SPRITE, s->tile + 1, s->x, s->y + TILE_HEIGHT, z, s->flipX, s->flipY))
+            if (!gbRenderTile(TILE_DATA_SPRITE, i + 1, s->x, s->y + TILE_HEIGHT, z, s->flipX, s->flipY))
                 return false;
     }
 
